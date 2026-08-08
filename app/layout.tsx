@@ -8,25 +8,23 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Westmonks — Shopify Automation & AI Operations",
+    default: "Westmonks — Shopify Operations & Automation",
     template: "%s | Westmonks",
   },
   description:
-    "Backend-Automatisierungen und KI-Systeme für wachsende Shopify-Stores: Rechnungen, Bestand, Support und Fulfillment ohne manuelles Chaos.",
+    "Maßgeschneiderte Backend-Automatisierungen für wachsende Shopify-Stores: Rechnungen, Bestand, Support und Fulfillment ohne manuelles Chaos.",
   keywords: [
     "Shopify Automatisierung",
     "Shopify Backend Automation",
-    "Shopify Lexoffice",
-    "Shopify sevDesk",
-    "AI Kundenservice",
-    "Make.com Shopify",
-    "Zapier Shopify",
+    "Shopify Bestandsabgleich",
+    "Shopify Kundenservice",
+    "Shopify Fulfillment Automation",
     "E-Commerce Operations",
   ],
   openGraph: {
-    title: "Westmonks — Shopify Automation & AI Operations",
+    title: "Westmonks — Shopify Operations & Automation",
     description:
-      "Wir beseitigen manuelles Chaos in Shopify-Stores durch intelligente Backend-Automatisierungen und KI-Workflows.",
+      "Wir beseitigen manuelles Chaos in Shopify-Stores durch intelligente Backend-Automatisierungen und klare Operations-Systeme.",
     type: "website",
     locale: "de_DE",
     url: "/",
@@ -34,7 +32,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Westmonks — Shopify Automation & AI Operations",
+    title: "Westmonks — Shopify Operations & Automation",
     description:
       "Rechnungen, Bestand, Support und Fulfillment — automatisiert statt manuell.",
   },
@@ -47,8 +45,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#050505",
-  colorScheme: "dark",
+  themeColor: "#ffffff",
+  colorScheme: "light",
 };
 
 export default function RootLayout({
