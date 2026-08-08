@@ -1,7 +1,8 @@
 # Westmonks
 
-High-end B2B one-pager for Westmonks, built with Next.js 16, TypeScript,
-Tailwind CSS, Framer Motion and Lucide React.
+Focused B2B one-pager for Westmonks: Shopify backend automation, AI support
+and custom operations workflows. Built with Next.js 16, TypeScript, Tailwind
+CSS, Framer Motion and Lucide React.
 
 ## Local development
 
@@ -22,9 +23,14 @@ npm run build
 
 ## Vercel configuration
 
-Set the following environment variable in the Vercel project:
+Set the following environment variables in the Vercel project:
 
-- `NEXT_PUBLIC_CALENDLY_URL`: full URL of the Calendly event.
+- `NEXT_PUBLIC_SITE_URL`: canonical production URL used for metadata and SEO.
+- `NEXT_PUBLIC_BOOKING_URL`: full Cal.com or Calendly event URL.
+
+Legacy fallback:
+
+- `NEXT_PUBLIC_CALENDLY_URL`: used when `NEXT_PUBLIC_BOOKING_URL` is omitted.
 
 Optional:
 
@@ -41,6 +47,13 @@ Regenerate the PDF and delivery chunks with:
 
 ```bash
 python3 scripts/generate_blueprint.py
+```
+
+The custom 8-second hero motion asset is H.264, has no audio and is kept below
+250 KB. Regenerate the video and WebP poster with:
+
+```bash
+python3 scripts/generate_hero_video.py
 ```
 
 ## Deploy

@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Westmonks — Digitale Infrastruktur, die skaliert";
+export const alt = "Westmonks — Shopify Automation & AI Operations";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -83,7 +83,7 @@ export default function OpenGraphImage() {
               letterSpacing: 3,
             }}
           >
-            DESIGN × COMMERCE × AUTOMATION
+            SHOPIFY OPERATIONS × AUTOMATION × AI
           </div>
           <div
             style={{
@@ -95,7 +95,7 @@ export default function OpenGraphImage() {
               letterSpacing: -4.5,
             }}
           >
-            Digitale Infrastruktur, die skaliert.
+            Dein Store wächst. Das Chaos nicht.
           </div>
           <div
             style={{
@@ -105,7 +105,7 @@ export default function OpenGraphImage() {
               fontSize: 26,
             }}
           >
-            Wir ersetzen manuelles Chaos durch intelligente Systeme.
+            Backend-Automatisierungen für Rechnungen, Bestand und Support.
           </div>
         </div>
       </div>
