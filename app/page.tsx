@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { FormEvent, ReactNode } from "react";
 import { useState } from "react";
 import { motion, MotionConfig } from "framer-motion";
@@ -190,15 +191,17 @@ export default function Home() {
           <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-6 sm:px-8 lg:px-12">
             <a
               href="#main"
-              className="group flex items-center gap-3"
+              className="relative block h-10 w-[150px] overflow-hidden sm:w-[180px]"
               aria-label="Westmonks Startseite"
             >
-              <span className="grid size-8 place-items-center rounded-full border border-white/20 bg-white/[0.03]">
-                <span className="size-2 rounded-full bg-signal shadow-[0_0_18px_rgba(199,255,74,.8)]" />
-              </span>
-              <span className="text-sm font-semibold tracking-[0.18em]">
-                WESTMONKS
-              </span>
+              <Image
+                src="https://res.cloudinary.com/kpcyenmx/image/upload/f_auto,q_auto/westmonks-logo-transparent_lzgn9i"
+                alt="Westmonks"
+                fill
+                priority
+                sizes="(min-width: 640px) 180px, 150px"
+                className="scale-[1.7] object-contain"
+              />
             </a>
 
             <nav className="hidden items-center gap-8 text-sm text-zinc-400 md:flex">
