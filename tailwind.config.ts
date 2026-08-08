@@ -9,9 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#050505",
-        paper: "#f4f4ef",
-        signal: "#c7ff4a",
+        ink: "#18181b",
+        paper: "#ffffff",
+        signal: "#059669",
       },
       fontFamily: {
         sans: [
@@ -32,7 +32,7 @@ const config: Config = {
         tighter: "-0.045em",
       },
       boxShadow: {
-        signal: "0 0 0 1px rgba(199,255,74,.14), 0 26px 90px rgba(199,255,74,.08)",
+        signal: "0 0 0 1px rgba(5,150,105,.12), 0 26px 90px rgba(5,150,105,.12)",
       },
     },
   },
