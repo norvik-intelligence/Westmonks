@@ -5,6 +5,7 @@ import { ArrowRight, Check, X } from "lucide-react";
 
 import { ContactForm } from "@/components/contact-form";
 import { JsonLd } from "@/components/json-ld";
+import { ShopAnalyzer } from "@/components/shop-analyzer";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import {
@@ -271,6 +272,28 @@ export default async function SolutionPage({ params }: PageProps) {
                   <p className="leading-7 text-zinc-600">{step.body}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/*
+          Eigenstaendiger Nutzen statt Doorway: die Analyse laeuft auf jeder
+          pSEO-Seite, nicht nur auf der Startseite. Besucher bekommen hier ein
+          Ergebnis zu ihrem eigenen Shop, ohne weiterklicken zu muessen.
+        */}
+        <section id="analyse" className="scroll-mt-6 bg-white py-20 sm:py-28">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
+            <h2 className="text-[clamp(2rem,3.6vw,3.4rem)] font-semibold leading-[0.98] tracking-[-0.05em]">
+              Wie viel davon trifft auf euren Shop zu?
+            </h2>
+            <p className="mt-6 max-w-2xl leading-8 text-zinc-600">
+              Trag deine Shop-Adresse ein. Die Analyse liest oeffentlich
+              sichtbare Signale aus und ordnet ein, welche der oben
+              beschriebenen Faelle bei {industry.audience}n typischerweise
+              zuerst auftreten.
+            </p>
+            <div className="mt-14">
+              <ShopAnalyzer />
             </div>
           </div>
         </section>
