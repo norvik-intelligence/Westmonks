@@ -86,10 +86,14 @@ const analysisSchema = {
       properties: {
         minimum: {
           type: "integer",
+          minimum: 0,
+          maximum: 160,
           description: "Konservative Untergrenze der monatlich vermeidbaren Stunden.",
         },
         maximum: {
           type: "integer",
+          minimum: 0,
+          maximum: 160,
           description: "Plausible Obergrenze der monatlich vermeidbaren Stunden.",
         },
       },
@@ -151,8 +155,8 @@ function cleanText(value: unknown, maximumLength: number) {
     .replace(/\s+/g, " ")
     .trim();
 
-  if (!cleaned || cleaned.length > maximumLength) return null;
-  return cleaned;
+  if (!cleaned) return null;
+  return cleaned.slice(0, maximumLength).trim();
 }
 
 function isConfidenceLevel(value: unknown): value is ConfidenceLevel {
@@ -209,13 +213,11 @@ function parseAnalysis(
   const minimum = hours.minimum;
   const maximum = hours.maximum;
   if (!Number.isInteger(minimum) || !Number.isInteger(maximum)) return null;
-  if (
-    (minimum as number) < 0 ||
-    (maximum as number) > 160 ||
-    (minimum as number) > (maximum as number)
-  ) {
-    return null;
-  }
+
+  const boundedMinimum = Math.min(160, Math.max(0, minimum as number));
+  const boundedMaximum = Math.min(160, Math.max(0, maximum as number));
+  const normalizedMinimum = Math.min(boundedMinimum, boundedMaximum);
+  const normalizedMaximum = Math.max(boundedMinimum, boundedMaximum);
 
   const title = cleanText(bottleneck.title, 160);
   const diagnosis = cleanText(bottleneck.diagnosis, 700);
@@ -240,8 +242,8 @@ function parseAnalysis(
     shopName,
     shopifyLikelihood: value.shopifyLikelihood,
     estimatedManualHoursPerMonth: {
-      minimum: minimum as number,
-      maximum: maximum as number,
+      minimum: normalizedMinimum,
+      maximum: normalizedMaximum,
     },
     primaryBottleneck: {
       category: bottleneck.category,
