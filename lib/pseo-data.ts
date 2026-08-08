@@ -418,16 +418,17 @@ export const tools: Tool[] = [
 
 /** Kuratierte Kombinationen – bewusst nicht vollständig gekreuzt. */
 const pairings: Record<string, string[]> = {
-  photovoltaik: ["lexoffice", "make", "n8n"],
+  // Regel: eine Kombination pro Branche und Kategorie (Buchhaltung, Workflow,
+  // Marketing, Warenwirtschaft). Zwei Make-URLs zur gleichen Branche erzeugen
+  // Duplicate Content – die gleiche Schmerzpunkt-Logik mit ausgetauschtem Tool.
+  photovoltaik: ["lexoffice", "make", "billbee"],
   "ev-ladeinfrastruktur": ["lexoffice", "n8n", "billbee"],
   "consumer-electronics": ["lexoffice", "klaviyo", "billbee"],
   supplements: ["klaviyo", "make", "billbee"],
-  "moebel-interior": ["lexoffice", "make", "shopify-flow"],
+  "moebel-interior": ["lexoffice", "make", "billbee"],
   "werkzeug-industriebedarf": ["lexoffice", "n8n", "billbee"],
-  "beauty-kosmetik": ["klaviyo", "shopify-flow", "make"],
-  "fahrrad-e-mobility": ["lexoffice", "n8n", "shopify-flow"],
-  // Neue Branchen bewusst mit je einem Tool pro Kategorie: zwei
-  // Buchhaltungstools zur selben Branche ergaeben zwei fast gleiche Seiten.
+  "beauty-kosmetik": ["lexoffice", "klaviyo", "billbee"],
+  "fahrrad-e-mobility": ["lexoffice", "n8n", "billbee"],
   "fashion-mode": ["sevdesk", "billbee", "klaviyo"],
   "b2b-grosshandel": ["datev", "billbee", "n8n"],
 };
