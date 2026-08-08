@@ -232,7 +232,7 @@ def cover_page(c: canvas.Canvas) -> None:
     c.drawString(MARGIN, PAGE_H - 290, "Blueprint.")
     draw_wrapped(
         c,
-        "Vom manuellen Engpass zum messbaren Operating System - in 30 Tagen.",
+        "Vom manuellen Shopify-Chaos zum kontrollierten Operations-System.",
         MARGIN,
         PAGE_H - 334,
         395,
@@ -245,9 +245,9 @@ def cover_page(c: canvas.Canvas) -> None:
     c.setFillColor(Color(1, 1, 1, alpha=0.04))
     c.roundRect(MARGIN, 90, PAGE_W - 2 * MARGIN, 180, 16, fill=1, stroke=0)
     labels = [
-        ("01", "Audit", "Engpässe sichtbar machen"),
-        ("02", "Architektur", "Systeme sauber verbinden"),
-        ("03", "Rollout", "In 30 Tagen operationalisieren"),
+        ("01", "Audit", "Manuelle Arbeit sichtbar machen"),
+        ("02", "Architektur", "Shopify-Systeme sauber verbinden"),
+        ("03", "Build", "Workflows kontrolliert ausrollen"),
     ]
     col_w = (PAGE_W - 2 * MARGIN) / 3
     for index, (number, title, copy) in enumerate(labels):
@@ -286,11 +286,11 @@ def audit_page(c: canvas.Canvas) -> None:
         x += width
 
     rows = [
-        ("Anfragen qualifizieren", "6-10", "HOCH", "HOCH"),
-        ("Angebote nachfassen", "3-5", "MITTEL", "SEHR HOCH"),
+        ("Rechnungen erstellen", "3-6", "HOCH", "MITTEL"),
+        ("Bestände abgleichen", "2-5", "SEHR HOCH", "HOCH"),
         ("Support beantworten", "8-15", "MITTEL", "MITTEL"),
-        ("Shop-Daten übertragen", "2-6", "HOCH", "MITTEL"),
-        ("Launch-Content verteilen", "5-9", "NIEDRIG", "HOCH"),
+        ("Retouren abwickeln", "3-7", "HOCH", "MITTEL"),
+        ("Fulfillment koordinieren", "2-6", "HOCH", "HOCH"),
     ]
     row_y = y - 62
     for row_index, row in enumerate(rows):
@@ -322,14 +322,14 @@ def architecture_page(c: canvas.Canvas) -> None:
         c,
         3,
         "02 / Architektur",
-        "Das Wachstumssystem in vier Schichten",
-        "Automatisierung wirkt erst dann, wenn Positionierung, Conversion, Daten und Operations dieselbe Logik teilen.",
+        "Das Shopify-Betriebssystem in vier Schichten",
+        "Automatisierung wird belastbar, wenn Events, Regeln, Aktionen und Kontrolle dieselbe operative Logik teilen.",
     )
     layers = [
-        ("01", "ATTRACT", "Website, Content, SEO, Launch-Kampagnen", SIGNAL),
-        ("02", "CONVERT", "Formulare, Produktlogik, Shopify, Booking", HexColor("#D9FF83")),
-        ("03", "OPERATE", "CRM, Routing, Support, Angebotsprozesse", HexColor("#A9D746")),
-        ("04", "LEARN", "Analytics, Feedback, Experimente, Forecast", HexColor("#6F8F2E")),
+        ("01", "EVENTS", "Orders, Payments, Bestand, Tickets, Retouren", SIGNAL),
+        ("02", "ORCHESTRATE", "Regeln, Daten-Mapping, KI-Entscheidungen", HexColor("#D9FF83")),
+        ("03", "ACT", "Rechnungen, Sync, Antworten, Fulfillment", HexColor("#A9D746")),
+        ("04", "CONTROL", "Logs, Alerts, Fallbacks, operative KPIs", HexColor("#6F8F2E")),
     ]
     card_h = 78
     for index, (number, title, copy, color) in enumerate(layers):
@@ -369,15 +369,15 @@ def web_page(c: canvas.Canvas) -> None:
     y = page_start(
         c,
         4,
-        "03 / Website",
-        "Von der digitalen Visitenkarte zur Entscheidungsmaschine",
-        "Eine B2B-Website muss Unsicherheit abbauen, Relevanz beweisen und den nächsten Schritt ohne Reibung auslösen.",
+        "03 / Financial Sync",
+        "Von der Bestellung zur korrekten Rechnung",
+        "Jede Order wird geprüft, sauber übertragen und nachvollziehbar mit Rechnung und Bestandsbewegung verbunden.",
     )
     items = [
-        ("01", "Spezifischer Einstieg", "Eine Zielgruppe, ein teurer Engpass, ein klares Ergebnis."),
-        ("02", "Beweisarchitektur", "Cases, Zahlen, Prozess und Risiko-Umkehr statt leerer Superlative."),
-        ("03", "Intent-Routing", "Besucher nach Projektart, Reifegrad und Markt in den richtigen Flow führen."),
-        ("04", "Conversion Loop", "Jeder CTA startet einen messbaren nächsten Schritt - nicht nur eine Kontaktmail."),
+        ("01", "Order Event", "Neue oder geänderte Shopify-Bestellung eindeutig erkennen."),
+        ("02", "Validierung", "Steuern, Adressen, Zahlstatus und Pflichtfelder vor Übergabe prüfen."),
+        ("03", "Invoice Sync", "Rechnung in Lexoffice oder sevDesk erstellen und rückverknüpfen."),
+        ("04", "Inventory Sync", "Bestandsbewegung im führenden System sauber bestätigen."),
     ]
     card_w = (PAGE_W - 2 * MARGIN - 14) / 2
     card_h = 148
@@ -393,7 +393,7 @@ def web_page(c: canvas.Canvas) -> None:
     c.drawString(MARGIN, 130, "CORE METRIC")
     draw_wrapped(
         c,
-        "Qualifizierte nächste Schritte / 100 Sessions",
+        "Manuelle Order-Touches / 100 Bestellungen",
         MARGIN,
         97,
         PAGE_W - 2 * MARGIN,
@@ -409,15 +409,15 @@ def commerce_page(c: canvas.Canvas) -> None:
     y = page_start(
         c,
         5,
-        "04 / Commerce",
-        "Shopify für erklärungsbedürftige Angebote",
-        "Komplexe Hardware und Services werden nicht durch mehr Text verkauft, sondern durch eine bessere Entscheidungslogik.",
+        "04 / Inventory",
+        "Bestand ohne Schattenlisten und Differenzen",
+        "Ein sauber definierter System-Owner verhindert, dass Shopify, ERP und Fulfillment gleichzeitig unterschiedliche Wahrheiten führen.",
     )
     stages = [
-        ("FIT", "Einsatzort, Budget und Anforderungen sauber erfassen"),
-        ("CONFIGURE", "Passende Variante, Zubehör und Servicepaket zusammenstellen"),
-        ("PROVE", "ROI, Lieferfähigkeit, Installation und Garantien belegen"),
-        ("CLOSE", "Kauf, Angebot oder Beratung passend zum Deal-Volumen auslösen"),
+        ("DETECT", "Bestandsänderung im führenden System erfassen"),
+        ("NORMALIZE", "SKU, Bundle, Variante und Lagerort eindeutig zuordnen"),
+        ("SYNC", "Änderung kontrolliert an angebundene Systeme übertragen"),
+        ("RECONCILE", "Abweichungen erkennen, protokollieren und gezielt eskalieren"),
     ]
     x = MARGIN
     available = PAGE_W - 2 * MARGIN
@@ -439,11 +439,11 @@ def commerce_page(c: canvas.Canvas) -> None:
     rounded_card(c, MARGIN, 121, available, 168, fill=HexColor("#101012"))
     c.setFont(FONT_BOLD, 12)
     c.setFillColor(WHITE)
-    c.drawString(MARGIN + 18, 260, "Checkout-Entscheidung nach Deal-Volumen")
+    c.drawString(MARGIN + 18, 260, "Bestandslogik nach Systemrolle")
     bands = [
-        ("< 500 EUR", "Direkter Checkout", 0.24),
-        ("500-5k EUR", "Konfiguration + Checkout", 0.52),
-        ("> 5k EUR", "Qualifiziertes Angebot", 0.86),
+        ("SHOPIFY", "Verkaufbarer Bestand", 0.42),
+        ("ERP / WAWI", "Führende Warenbewegung", 0.72),
+        ("3PL", "Physischer Lagerstatus", 0.91),
     ]
     bar_y = 220
     for label, action, ratio in bands:
@@ -465,9 +465,9 @@ def ai_page(c: canvas.Canvas) -> None:
     y = page_start(
         c,
         6,
-        "05 / AI Operations",
-        "KI dort einsetzen, wo sie kontrollierbar gewinnt",
-        "Der beste Agent übernimmt kein Unternehmen. Er übernimmt einen klar abgegrenzten Prozess mit definierten Grenzen.",
+        "05 / AI Support",
+        "Support automatisieren, ohne Kontrolle abzugeben",
+        "Der Agent übernimmt klar abgegrenzte Anfragen, kennt seine Grenzen und eskaliert riskante Fälle nachvollziehbar an Menschen.",
     )
     phases = [
         ("TRIGGER", "Neue Anfrage, Ticket, Auftrag oder Datenänderung"),
@@ -518,15 +518,15 @@ def energy_page(c: canvas.Canvas) -> None:
     y = page_start(
         c,
         7,
-        "06 / Vertical Playbook",
-        "Photovoltaik: Vom Standort zum qualifizierten Projekt",
-        "Das System reduziert Blindanfragen und führt Entscheider mit den richtigen Daten in eine belastbare Erstbewertung.",
+        "06 / Returns",
+        "Von der Anfrage zum kontrollierten Rücklauf",
+        "Retouren werden schneller, wenn Prüfung, Freigabe, Versand und Erstattung als ein nachvollziehbarer Workflow laufen.",
     )
     steps = [
-        ("Standort", "Adresse, Dachtyp, Fläche, Netzanschluss"),
-        ("Bedarf", "Verbrauch, Lastprofil, Eigenverbrauchsziel"),
-        ("Machbarkeit", "Dokumente, Fotos, technische Ausschlüsse"),
-        ("Business Case", "Bandbreite, Einsparung, nächster Termin"),
+        ("Anfrage", "Order, Artikel, Frist und Rücksendegrund erfassen"),
+        ("Prüfung", "Regeln, Ausschlüsse und erforderliche Nachweise anwenden"),
+        ("Freigabe", "Label, Anweisung oder menschliche Prüfung auslösen"),
+        ("Abschluss", "Eingang, Bestand, Erstattung und Kundenstatus aktualisieren"),
     ]
     for index, (title, copy) in enumerate(steps):
         top = y - index * 92
@@ -553,13 +553,13 @@ def energy_page(c: canvas.Canvas) -> None:
     c.drawString(MARGIN + 18, 161, "Automatisierbar")
     c.setFont(FONT_REGULAR, 8)
     c.setFillColor(ZINC_500)
-    c.drawString(MARGIN + 18, 137, "Datenerfassung · Vollständigkeitscheck · Routing · Follow-up")
+    c.drawString(MARGIN + 18, 137, "Datenerfassung · Regelprüfung · Label · Status-Updates")
     c.setFont(FONT_BOLD, 11)
     c.setFillColor(WHITE)
     c.drawString(MARGIN + 290, 161, "Menschlich")
     c.setFont(FONT_REGULAR, 8)
     c.setFillColor(ZINC_500)
-    c.drawString(MARGIN + 290, 137, "Technische Freigabe · Beratung · Vertragsentscheidung")
+    c.drawString(MARGIN + 290, 137, "Kulanz · Betrugsverdacht · Sonderfall · finale Freigabe")
     c.showPage()
 
 
@@ -567,22 +567,22 @@ def ev_page(c: canvas.Canvas) -> None:
     y = page_start(
         c,
         8,
-        "07 / Expansion Playbook",
-        "EV-Ladeinfrastruktur in Marokko: Digital zuerst expandieren",
-        "Vor physischer Skalierung braucht der Markt ein digitales System für Standortpipeline, Partnerqualifizierung und Betriebsdaten.",
+        "07 / Fulfillment",
+        "Sonderprozesse kontrolliert orchestrieren",
+        "Individuelle Logistik wird beherrschbar, wenn Trigger, Systemaktionen und Ausnahmen klar voneinander getrennt sind.",
     )
     columns = [
         (
-            "PIPELINE",
-            ["Standortgeber erfassen", "Traffic und Nutzung bewerten", "Dokumente zentralisieren"],
+            "TRIGGER",
+            ["Bestellung und Zahlungsstatus prüfen", "SKU und Versandprofil erkennen", "Sonderregeln eindeutig anwenden"],
         ),
         (
-            "PARTNER",
-            ["Installateure qualifizieren", "SLAs und Regionen routen", "Freigaben dokumentieren"],
+            "ORCHESTRATE",
+            ["3PL oder Lieferant ansteuern", "Dokumente und Daten übertragen", "Status an Shopify zurückspielen"],
         ),
         (
-            "OPERATIONS",
-            ["Störungen priorisieren", "Support automatisieren", "Uptime und Nutzung messen"],
+            "EXCEPTIONS",
+            ["Fehler automatisch klassifizieren", "Nur relevante Fälle eskalieren", "Auflösung vollständig protokollieren"],
         ),
     ]
     card_w = (PAGE_W - 2 * MARGIN - 20) / 3
@@ -612,7 +612,7 @@ def ev_page(c: canvas.Canvas) -> None:
     c.drawString(MARGIN, 156, "NORTH STAR")
     draw_wrapped(
         c,
-        "Verifizierte Standorte mit belastbarem Next Step",
+        "Erfolgreiche Fulfillment-Läufe mit nachvollziehbarem Status",
         MARGIN,
         121,
         PAGE_W - 2 * MARGIN,
@@ -628,15 +628,15 @@ def android_page(c: canvas.Canvas) -> None:
     y = page_start(
         c,
         9,
-        "08 / Launch Playbook",
-        "Android-App-Launch: Hype als messbares System",
-        "Reichweite ohne Aktivierung ist Lärm. Der Launch verbindet Narrative, Waitlist, Creator-Loops und Produktdaten.",
+        "08 / Support Loop",
+        "Von der Kundenfrage zur nächsten Aktion",
+        "Antwortqualität entsteht nicht durch längere Prompts, sondern durch sauberen Kontext, klare Regeln und einen definierten Eskalationsweg.",
     )
     loop = [
-        ("NARRATIVE", "Ein Satz, der Problem, Gegner und neue Möglichkeit verdichtet."),
-        ("WAITLIST", "Segmentiert nach Motivation statt nur E-Mail-Adressen zu sammeln."),
-        ("CREATOR LOOP", "Assets, Hooks und Tracking für glaubwürdige Multiplikatoren."),
-        ("ACTIVATION", "Store-Besuch, Installation und erster Wertmoment als Funnel."),
+        ("INTERPRET", "Anliegen, Tonalität, Order und Dringlichkeit zuverlässig erkennen."),
+        ("CONTEXT", "Nur freigegebene Shop-, Produkt- und Kundendaten laden."),
+        ("RESPOND", "Antwort und zulässige Systemaktion konsistent ausführen."),
+        ("ESCALATE", "Unsichere, teure oder sensible Fälle begründet übergeben."),
     ]
     card_w = (PAGE_W - 2 * MARGIN - 14) / 2
     card_h = 137
@@ -650,10 +650,10 @@ def android_page(c: canvas.Canvas) -> None:
     rounded_card(c, MARGIN, 92, PAGE_W - 2 * MARGIN, 92, fill=SIGNAL, stroke=SIGNAL)
     c.setFont(FONT_MONO, 7)
     c.setFillColor(BLACK)
-    c.drawString(MARGIN + 18, 157, "LAUNCH EQUATION")
+    c.drawString(MARGIN + 18, 157, "SUPPORT EQUATION")
     draw_wrapped(
         c,
-        "Relevante Reichweite x Store Conversion x Aktivierung = echter Launch",
+        "Freigegebener Kontext x klare Regeln x Eskalation = belastbarer Support",
         MARGIN + 18,
         126,
         PAGE_W - 2 * MARGIN - 36,
@@ -676,7 +676,7 @@ def rollout_page(c: canvas.Canvas) -> None:
     weeks = [
         ("WOCHE 01", "Diagnose", "Prozesse, Daten, Risiken und Baseline erfassen."),
         ("WOCHE 02", "Systemdesign", "Zielprozess, Verantwortungen und Kontrollpunkte definieren."),
-        ("WOCHE 03", "Build", "Frontend, Integrationen und Automationslogik implementieren."),
+        ("WOCHE 03", "Build", "Backend, Integrationen und Automationslogik implementieren."),
         ("WOCHE 04", "Härtung", "Edge Cases testen, Team übergeben und KPIs live schalten."),
     ]
     start_x = MARGIN + 12
@@ -728,10 +728,10 @@ def kpi_page(c: canvas.Canvas) -> None:
         "Miss wenige Zahlen, die Verhalten verändern. Vanity Metrics gehören nicht in den operativen Takt.",
     )
     metrics = [
-        ("SPEED", "Durchlaufzeit", "-42%", 0.74),
-        ("QUALITY", "Fehlerquote", "-61%", 0.86),
-        ("GROWTH", "Qualifizierte Schritte", "+28%", 0.63),
-        ("MARGIN", "Kosten pro Vorgang", "-35%", 0.69),
+        ("TIME", "Manuelle Stunden", "IST", 0.74),
+        ("QUALITY", "Fehler pro 100 Orders", "ZIEL", 0.86),
+        ("SUPPORT", "Zeit bis zur Erstreaktion", "SLA", 0.63),
+        ("RELIABILITY", "Erfolgreiche Workflow-Läufe", "RATE", 0.69),
     ]
     card_w = (PAGE_W - 2 * MARGIN - 14) / 2
     card_h = 138
@@ -822,7 +822,7 @@ def closing_page(c: canvas.Canvas) -> None:
     c.drawString(MARGIN + 20, 178, "Der schnellste Hebel ist selten der offensichtlichste.")
     draw_wrapped(
         c,
-        "Westmonks verbindet High-End Webdesign, Shopify und AI-Automation zu einem messbaren Betriebssystem.",
+        "Westmonks baut Shopify-Backend-Automatisierungen und KI-Workflows, die manuelle Operations kontrolliert eliminieren.",
         MARGIN + 20,
         149,
         PAGE_W - 2 * MARGIN - 40,
@@ -841,7 +841,7 @@ def build_base_pdf(path: Path) -> None:
     c = canvas.Canvas(path.as_posix(), pagesize=A4, pageCompression=1)
     c.setTitle("Der Automatisierungs-Blueprint")
     c.setAuthor("Westmonks")
-    c.setSubject("B2B Automation, Webdesign, Shopify und AI Operations")
+    c.setSubject("Shopify Backend Automation und AI Operations")
     c.setCreator("Westmonks")
     cover_page(c)
     audit_page(c)
@@ -865,7 +865,7 @@ def write_with_payload(reader: PdfReader, payload_size: int) -> bytes:
         {
             "/Title": "Der Automatisierungs-Blueprint",
             "/Author": "Westmonks",
-            "/Subject": "Digitales Operating System für B2B-Entscheider",
+            "/Subject": "Shopify Operations Blueprint für B2B-Entscheider",
         }
     )
     prefix = b"WESTMONKS BLUEPRINT SUPPORT DATA\n"

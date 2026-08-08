@@ -2,26 +2,31 @@ import type { Metadata, Viewport } from "next";
 
 import "./globals.css";
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://westmonks.vercel.app";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://westmonks.de"),
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "Westmonks — Digitale Infrastruktur, die skaliert",
+    default: "Westmonks — Shopify Automation & AI Operations",
     template: "%s | Westmonks",
   },
   description:
-    "High-End Webdesign, Shopify und AI-Automation für Energieanbieter, EV-Infrastruktur und ambitionierte Tech-Brands.",
+    "Backend-Automatisierungen und KI-Systeme für wachsende Shopify-Stores: Rechnungen, Bestand, Support und Fulfillment ohne manuelles Chaos.",
   keywords: [
-    "B2B Webdesign",
-    "Shopify Agentur",
-    "AI Automation",
-    "Photovoltaik Marketing",
-    "EV Ladeinfrastruktur Marokko",
-    "Android App Launch",
+    "Shopify Automatisierung",
+    "Shopify Backend Automation",
+    "Shopify Lexoffice",
+    "Shopify sevDesk",
+    "AI Kundenservice",
+    "Make.com Shopify",
+    "Zapier Shopify",
+    "E-Commerce Operations",
   ],
   openGraph: {
-    title: "Westmonks — Digitale Infrastruktur, die skaliert",
+    title: "Westmonks — Shopify Automation & AI Operations",
     description:
-      "Design, Commerce und Automation als ein zusammenhängendes Wachstumssystem.",
+      "Wir beseitigen manuelles Chaos in Shopify-Stores durch intelligente Backend-Automatisierungen und KI-Workflows.",
     type: "website",
     locale: "de_DE",
     url: "/",
@@ -29,9 +34,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Westmonks — Digitale Infrastruktur, die skaliert",
+    title: "Westmonks — Shopify Automation & AI Operations",
     description:
-      "Design, Commerce und Automation als ein zusammenhängendes Wachstumssystem.",
+      "Rechnungen, Bestand, Support und Fulfillment — automatisiert statt manuell.",
   },
   robots: {
     index: true,

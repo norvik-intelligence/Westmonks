@@ -79,6 +79,11 @@ input:focus-visible {
   );
 }
 
+.hero-video {
+  pointer-events: none;
+  filter: saturate(0.9) contrast(1.08);
+}
+
 .hide-scrollbar {
   scrollbar-width: none;
 }
@@ -99,5 +104,9 @@ input:focus-visible {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .hero-video {
+    display: none;
   }
 }
