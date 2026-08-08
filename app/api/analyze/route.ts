@@ -53,9 +53,9 @@ type AnalysisResult = {
 };
 
 type GeminiInteractionResponse = {
+  status?: string;
   steps?: Array<{
     type?: string;
-    status?: string;
     content?: Array<{
       type?: string;
       text?: string;
@@ -340,8 +340,10 @@ function errorResponse(
 }
 
 function getGeminiText(payload: GeminiInteractionResponse) {
+  if (payload.status && payload.status !== "completed") return undefined;
+
   const outputSteps = payload.steps?.filter(
-    (step) => step.type === "model_output" && step.status === "done",
+    (step) => step.type === "model_output",
   );
 
   return outputSteps
