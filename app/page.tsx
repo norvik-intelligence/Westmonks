@@ -3,25 +3,25 @@
 import Image from "next/image";
 import type { FormEvent, ReactNode } from "react";
 import { useState } from "react";
-import { motion, MotionConfig } from "framer-motion";
+import { AnimatePresence, motion, MotionConfig } from "framer-motion";
 import {
   ArrowDown,
   ArrowRight,
   Bot,
   Check,
-  Clock3,
-  Download,
-  Gauge,
+  CircleAlert,
   Headphones,
-  Link2,
   LockKeyhole,
   MoveUpRight,
-  PackageCheck,
+  Radar,
   ReceiptText,
   RefreshCw,
+  RotateCcw,
+  ScanLine,
+  Search,
   ShieldCheck,
+  Sparkles,
   Workflow,
-  Wrench,
   Zap,
   type LucideIcon,
 } from "lucide-react";
@@ -90,6 +90,40 @@ const previewFlows: Array<{
   },
 ];
 
+type ConfidenceLevel = "hoch" | "mittel" | "niedrig";
+
+type AnalysisResult = {
+  analyzedUrl: string;
+  shopName: string;
+  shopifyLikelihood: ConfidenceLevel;
+  estimatedManualHoursPerMonth: {
+    minimum: number;
+    maximum: number;
+  };
+  primaryBottleneck: {
+    category: string;
+    title: string;
+    diagnosis: string;
+  };
+  recommendedAutomation: string;
+  publicSignals: string[];
+  confidence: ConfidenceLevel;
+  disclaimer: string;
+};
+
+type AnalyzeResponse =
+  | {
+      ok: true;
+      requestId: string;
+      data: AnalysisResult;
+      meta: { analyzedAt: string; cached: boolean };
+    }
+  | {
+      ok: false;
+      requestId: string;
+      error: { code: string; message: string };
+    };
+
 function Reveal({
   children,
   className = "",
@@ -132,95 +166,83 @@ function SectionKicker({
   );
 }
 
-function getBookingEmbedUrl(value?: string) {
-  if (!value) return "";
-
-  try {
-    const url = new URL(value);
-    const isCal = url.hostname === "cal.com" || url.hostname.endsWith(".cal.com");
-    const theme = isCal
-      ? {
-          embed: "1",
-          theme: "dark",
-          layout: "month_view",
-        }
-      : {
-          hide_gdpr_banner: "1",
-          background_color: "050505",
-          text_color: "f4f4ef",
-          primary_color: "c7ff4a",
-        };
-
-    Object.entries(theme).forEach(([key, themeValue]) => {
-      if (!url.searchParams.has(key)) url.searchParams.set(key, themeValue);
-    });
-
-    return url.toString();
-  } catch {
-    return value;
-  }
-}
+const confidenceLabel: Record<ConfidenceLevel, string> = {
+  hoch: "Hohe Sicherheit",
+  mittel: "Mittlere Sicherheit",
+  niedrig: "Niedrige Sicherheit",
+};
 
 export default function Home() {
-  const [downloadState, setDownloadState] = useState<
+  const [shopUrl, setShopUrl] = useState("");
+  const [analysisState, setAnalysisState] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [analysisError, setAnalysisError] = useState("");
 
-  const bookingUrl = getBookingEmbedUrl(
-    process.env.NEXT_PUBLIC_BOOKING_URL?.trim() ||
-      process.env.NEXT_PUBLIC_CALENDLY_URL?.trim(),
-  );
-
-  async function handleBlueprintRequest(event: FormEvent<HTMLFormElement>) {
+  async function handleAnalyze(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const email = String(formData.get("email") ?? "").trim();
+    if (analysisState === "loading") return;
 
-    if (!email) return;
+    setAnalysisState("loading");
+    setAnalysis(null);
+    setAnalysisError("");
 
-    setDownloadState("loading");
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 32_000);
 
     try {
-      const endpoint = process.env.NEXT_PUBLIC_LEAD_ENDPOINT?.trim();
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: shopUrl.trim() }),
+        signal: controller.signal,
+      });
+      const payload = (await response.json()) as AnalyzeResponse;
 
-      if (endpoint) {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            source: "shopify-automatisierungs-blueprint",
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Lead endpoint rejected the request");
-        }
+      if (!response.ok || !payload.ok) {
+        throw new Error(
+          payload.ok
+            ? "Die Analyse konnte nicht abgeschlossen werden."
+            : payload.error.message,
+        );
       }
 
-      const download = document.createElement("a");
-      download.href = "/automatisierungs-blueprint.pdf";
-      download.download = "Westmonks-Automatisierungs-Blueprint.pdf";
-      document.body.appendChild(download);
-      download.click();
-      download.remove();
+      setAnalysis(payload.data);
+      setAnalysisState("success");
+    } catch (error) {
+      const timedOut =
+        error instanceof Error &&
+        (error.name === "AbortError" || error.name === "TimeoutError");
 
-      form.reset();
-      setDownloadState("success");
-    } catch {
-      setDownloadState("error");
+      setAnalysisError(
+        timedOut
+          ? "Die Analyse hat zu lange gedauert. Bitte versuche es erneut."
+          : error instanceof Error
+            ? error.message
+            : "Die Analyse konnte nicht gestartet werden.",
+      );
+      setAnalysisState("error");
+    } finally {
+      window.clearTimeout(timeout);
     }
+  }
+
+  function resetAnalysis() {
+    setAnalysisState("idle");
+    setAnalysis(null);
+    setAnalysisError("");
+    setShopUrl("");
   }
 
   return (
     <MotionConfig reducedMotion="user">
       <main id="main" className="noise overflow-hidden bg-ink text-paper">
         <a
-          href="#content"
+          href="#analyse"
           className="fixed left-4 top-4 z-[100] -translate-y-24 rounded-full bg-signal px-5 py-3 text-sm font-semibold text-black transition-transform focus:translate-y-0"
         >
-          Zum Inhalt springen
+          Zur Shop-Analyse springen
         </a>
 
         <header className="absolute inset-x-0 top-0 z-50">
@@ -241,23 +263,20 @@ export default function Home() {
             </a>
 
             <nav className="hidden items-center gap-8 text-sm text-zinc-400 lg:flex">
+              <a className="transition-colors hover:text-white" href="#analyse">
+                AI-Analyse
+              </a>
               <a className="transition-colors hover:text-white" href="#system">
                 Betriebssystem
-              </a>
-              <a className="transition-colors hover:text-white" href="#ownership">
-                Ownership
-              </a>
-              <a className="transition-colors hover:text-white" href="#blueprint">
-                Blueprint
               </a>
             </nav>
 
             <a
-              href="#booking"
+              href="#analyse"
               className="group inline-flex min-h-10 items-center gap-2 rounded-full border border-white/15 bg-black/35 px-4 text-xs font-medium text-white backdrop-blur-xl transition-colors hover:border-signal/50 hover:bg-signal hover:text-black sm:px-5 sm:text-sm"
             >
-              <span className="hidden sm:inline">Automatisierungs-Check</span>
-              <span className="sm:hidden">Check buchen</span>
+              <span className="hidden sm:inline">Shop analysieren</span>
+              <span className="sm:hidden">AI-Check</span>
               <MoveUpRight
                 className="size-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                 aria-hidden="true"
@@ -339,7 +358,10 @@ export default function Home() {
               >
                 Wir bauen die Backend-Automatisierungen und KI-Systeme, die
                 Rechnungen schreiben, Bestände abgleichen und deinen Support
-                übernehmen. <strong className="font-medium text-white">Ohne Personalaufwand.</strong>
+                übernehmen.{" "}
+                <strong className="font-medium text-white">
+                  Ohne Personalaufwand.
+                </strong>
               </motion.p>
 
               <motion.div
@@ -355,10 +377,10 @@ export default function Home() {
                 <motion.a
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.985 }}
-                  href="#booking"
+                  href="#analyse"
                   className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-full bg-signal px-7 text-sm font-semibold text-black shadow-signal transition-shadow hover:shadow-[0_0_55px_rgba(199,255,74,.2)] sm:text-base"
                 >
-                  Automatisierungs-Check buchen
+                  Shop kostenlos analysieren
                   <ArrowRight
                     className="size-4 transition-transform group-hover:translate-x-1"
                     aria-hidden="true"
@@ -380,9 +402,9 @@ export default function Home() {
                 className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-xs text-zinc-500 sm:text-sm"
               >
                 {[
-                  "In deinem Workspace",
-                  "Sauber dokumentiert",
-                  "Optionaler SLA-Betrieb",
+                  "Sichere Server-Analyse",
+                  "Kein Shopify-Login",
+                  "Ergebnis in Sekunden",
                 ].map((item) => (
                   <span key={item} className="flex items-center gap-2">
                     <Check className="size-3.5 text-signal" aria-hidden="true" />
@@ -419,7 +441,10 @@ export default function Home() {
                       key={flow.label}
                       initial={{ opacity: 0, x: 14 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.55, delay: 0.46 + index * 0.1 }}
+                      transition={{
+                        duration: 0.55,
+                        delay: 0.46 + index * 0.1,
+                      }}
                       className="mb-2 grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.035] px-4 py-4 last:mb-0"
                     >
                       <span className="grid size-9 place-items-center rounded-lg border border-white/10 bg-black/40 text-signal">
@@ -473,475 +498,651 @@ export default function Home() {
           </div>
         </section>
 
-        <div id="content">
-          <section
-            id="system"
-            className="relative px-5 py-24 sm:px-8 sm:py-32 lg:px-12 lg:py-40"
-          >
-            <div
-              className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(199,255,74,.35),transparent)]"
-              aria-hidden="true"
-            />
-            <div className="mx-auto grid max-w-[1440px] gap-14 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
-              <Reveal className="lg:sticky lg:top-28 lg:h-fit">
-                <SectionKicker index="01">Die Kern-Engine</SectionKicker>
-                <h2 className="text-balance text-5xl font-semibold leading-[0.92] tracking-[-0.05em] sm:text-7xl lg:text-[5.6rem]">
-                  Das Shopify-
-                  <span className="block text-zinc-600">Betriebssystem</span>
-                </h2>
-                <p className="mt-7 max-w-xl text-base leading-7 text-zinc-400 sm:text-lg sm:leading-8">
-                  Kein Sammelsurium aus einzelnen Zaps. Ein kontrollierter
-                  Datenfluss, in dem Bestellungen, Finanzen, Bestand, Support und
-                  Fulfillment zuverlässig ineinandergreifen.
-                </p>
+        <section
+          id="analyse"
+          className="relative border-b border-white/10 px-5 py-24 sm:px-8 sm:py-32 lg:px-12 lg:py-40"
+        >
+          <div
+            className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(199,255,74,.45),transparent)]"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute left-1/2 top-1/3 size-[620px] -translate-x-1/2 rounded-full bg-signal/[0.035] blur-[150px]"
+            aria-hidden="true"
+          />
 
-                <div className="mt-10 hidden rounded-2xl border border-white/10 bg-white/[0.025] p-5 lg:block">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-600">
-                    Ein Ereignis. Ein definierter Ablauf.
+          <div className="relative mx-auto max-w-[1320px]">
+            <Reveal>
+              <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-end lg:gap-20">
+                <div>
+                  <SectionKicker index="01">Gemini Operations Scan</SectionKicker>
+                  <h2 className="text-balance text-5xl font-semibold leading-[0.92] tracking-[-0.055em] sm:text-7xl lg:text-[5.4rem]">
+                    Finde den teuersten
+                    <span className="block text-zinc-600">
+                      manuellen Engpass.
+                    </span>
+                  </h2>
+                </div>
+                <div className="lg:pb-2">
+                  <p className="max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg sm:leading-8">
+                    Gib deine Shop-URL ein. Gemini prüft die öffentliche
+                    Storefront, clustert sichtbare Operations-Signale und
+                    berechnet dein wahrscheinlich stärkstes
+                    Automatisierungspotenzial.
                   </p>
-                  <div className="mt-4 flex items-center gap-3 text-xs text-zinc-400">
-                    <span>Shopify Event</span>
-                    <ArrowRight className="size-3.5 text-signal" aria-hidden="true" />
-                    <span>Orchestration</span>
-                    <ArrowRight className="size-3.5 text-signal" aria-hidden="true" />
-                    <span>Ergebnis</span>
+                  <div className="mt-6 flex flex-wrap gap-2 font-mono text-[8px] uppercase tracking-[0.15em] text-zinc-500">
+                    {[
+                      "API-Key nur serverseitig",
+                      "URL Context",
+                      "Rate Limited",
+                    ].map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-full border border-white/10 bg-white/[0.025] px-3 py-1.5"
+                      >
+                        {item}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              </Reveal>
+              </div>
+            </Reveal>
 
-              <div className="relative">
-                <div
-                  className="absolute bottom-16 left-[25px] top-16 w-px bg-[linear-gradient(180deg,transparent,rgba(199,255,74,.38),transparent)] sm:left-[33px]"
-                  aria-hidden="true"
-                />
+            <Reveal delay={0.08} className="mt-14">
+              <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#080808] shadow-[0_35px_120px_rgba(0,0,0,.5)] sm:rounded-[2.25rem]">
+                <div className="flex flex-col gap-3 border-b border-white/10 px-5 py-4 font-mono text-[8px] uppercase tracking-[0.18em] text-zinc-600 sm:flex-row sm:items-center sm:justify-between sm:px-8 sm:text-[9px]">
+                  <span className="flex items-center gap-2">
+                    <span className="size-1.5 rounded-full bg-signal shadow-[0_0_12px_rgba(199,255,74,.8)]" />
+                    Westmonks / AI Operations Diagnostic
+                  </span>
+                  <span>Gemini 3.1 Flash-Lite · Secure Server Route</span>
+                </div>
 
-                <div className="space-y-5">
-                  {modules.map((module, index) => {
-                    const Icon = module.icon;
-                    return (
-                      <Reveal key={module.title} delay={index * 0.08}>
-                        <motion.article
-                          whileHover={{ y: -4 }}
-                          transition={{ duration: 0.25 }}
-                          className="group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-zinc-950/80 p-5 transition-colors hover:border-signal/25 sm:rounded-[2rem] sm:p-8"
-                        >
-                          <div
-                            className="absolute -right-20 -top-20 size-64 rounded-full bg-signal/0 blur-3xl transition-colors duration-500 group-hover:bg-signal/[0.055]"
+                <div className="grid lg:grid-cols-[0.86fr_1.14fr]">
+                  <div className="border-b border-white/10 p-5 sm:p-8 lg:border-b-0 lg:border-r lg:p-10">
+                    <div className="flex items-start justify-between gap-6">
+                      <span className="grid size-12 place-items-center rounded-2xl border border-signal/20 bg-signal/[0.07] text-signal">
+                        <Search className="size-5" aria-hidden="true" />
+                      </span>
+                      <span className="rounded-full border border-white/10 px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.15em] text-zinc-600">
+                        01 URL · 01 Diagnose
+                      </span>
+                    </div>
+
+                    <h3 className="mt-9 text-balance text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
+                      Welche Operation kostet dich jeden Monat Zeit?
+                    </h3>
+                    <p className="mt-4 max-w-lg text-sm leading-6 text-zinc-500 sm:text-base sm:leading-7">
+                      Kein Login, kein App-Zugriff. Die Analyse arbeitet mit
+                      öffentlich sichtbaren Storefront-Signalen und
+                      Shopify-Operations-Mustern.
+                    </p>
+
+                    <form
+                      className="mt-8"
+                      onSubmit={handleAnalyze}
+                      aria-label="Shopify-Shop analysieren"
+                    >
+                      <label
+                        htmlFor="shop-url"
+                        className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500"
+                      >
+                        Shopify-Shop-URL
+                      </label>
+                      <div className="mt-3 rounded-[1.3rem] border border-white/10 bg-black/45 p-2 transition-colors focus-within:border-signal/40">
+                        <div className="flex min-h-14 items-center gap-3 px-3">
+                          <LockKeyhole
+                            className="size-4 shrink-0 text-signal"
                             aria-hidden="true"
                           />
-
-                          <div className="relative grid gap-6 sm:grid-cols-[68px_1fr] sm:gap-8">
-                            <div className="relative z-10 flex items-start justify-between sm:block">
-                              <span className="grid size-[52px] place-items-center rounded-2xl border border-signal/20 bg-signal/[0.07] text-signal sm:size-[68px] sm:rounded-[1.35rem]">
-                                <Icon className="size-5 sm:size-6" aria-hidden="true" />
-                              </span>
-                              <span className="font-mono text-[9px] text-zinc-700 sm:mt-5 sm:block sm:text-center">
-                                {module.number} / 03
-                              </span>
-                            </div>
-
-                            <div>
-                              <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-signal/70">
-                                {module.eyebrow}
-                              </p>
-                              <h3 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">
-                                {module.title}
-                              </h3>
-                              <p className="mt-5 max-w-2xl text-[15px] leading-7 text-zinc-400 sm:text-base">
-                                {module.copy}
-                              </p>
-
-                              <div className="mt-7 flex flex-wrap gap-2">
-                                {module.tags.map((tag) => (
-                                  <span
-                                    key={tag}
-                                    className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.13em] text-zinc-500"
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="relative mt-7 grid gap-2 rounded-xl border border-white/[0.07] bg-black/35 p-3 sm:ml-[100px] sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:p-4">
-                            <div>
-                              <p className="font-mono text-[8px] uppercase tracking-[0.17em] text-zinc-700">
-                                Trigger
-                              </p>
-                              <p className="mt-1 text-xs font-medium text-zinc-300 sm:text-sm">
-                                {module.trigger}
-                              </p>
-                            </div>
-                            <div className="hidden items-center gap-1 sm:flex" aria-hidden="true">
-                              <span className="h-px w-6 bg-white/10" />
-                              <span className="grid size-7 place-items-center rounded-full border border-signal/20 bg-signal/[0.07]">
-                                <Zap className="size-3 text-signal" />
-                              </span>
-                              <span className="h-px w-6 bg-white/10" />
-                            </div>
-                            <div className="sm:text-right">
-                              <p className="font-mono text-[8px] uppercase tracking-[0.17em] text-zinc-700">
-                                Ergebnis
-                              </p>
-                              <p className="mt-1 text-xs font-medium text-zinc-300 sm:text-sm">
-                                {module.result}
-                              </p>
-                            </div>
-                          </div>
-                        </motion.article>
-                      </Reveal>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section
-            id="ownership"
-            className="relative border-y border-white/10 bg-[#080808] px-5 py-24 sm:px-8 sm:py-32 lg:px-12 lg:py-40"
-          >
-            <div
-              className="absolute inset-0 opacity-[0.16] [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(circle_at_50%_45%,black,transparent_78%)]"
-              aria-hidden="true"
-            />
-            <div className="relative mx-auto max-w-[1320px]">
-              <Reveal>
-                <SectionKicker index="02">Build vs. Run</SectionKicker>
-                <div className="grid gap-10 lg:grid-cols-[1.12fr_.88fr] lg:items-end lg:gap-20">
-                  <h2 className="text-balance text-4xl font-semibold leading-[0.97] tracking-[-0.05em] sm:text-6xl lg:text-7xl">
-                    Keine Support-Fallen.
-                    <span className="block text-zinc-600">Kein versteckter Lock-in.</span>
-                  </h2>
-                  <p className="max-w-xl text-base leading-7 text-zinc-300 lg:justify-self-end lg:text-lg lg:leading-8">
-                    Wir bauen das System in deinem eigenen Workspace auf. Es gehört
-                    zu <strong className="font-medium text-white">100% dir.</strong> Auf
-                    Wunsch sichern wir den Betrieb über modulare SLAs ab.
-                  </p>
-                </div>
-              </Reveal>
-
-              <div className="mt-14 grid gap-4 lg:grid-cols-2">
-                <Reveal>
-                  <article className="relative min-h-[410px] overflow-hidden rounded-[2rem] bg-signal p-7 text-black sm:p-10">
-                    <div
-                      className="absolute -right-20 -top-20 size-72 rounded-full border border-black/10"
-                      aria-hidden="true"
-                    />
-                    <div
-                      className="absolute -right-6 -top-6 size-44 rounded-full border border-black/10"
-                      aria-hidden="true"
-                    />
-                    <div className="relative flex items-start justify-between">
-                      <span className="grid size-12 place-items-center rounded-2xl bg-black text-signal">
-                        <Wrench className="size-5" aria-hidden="true" />
-                      </span>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/50">
-                        Kernleistung
-                      </span>
-                    </div>
-                    <div className="relative mt-16">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-black/55">
-                        Build
-                      </p>
-                      <h3 className="mt-3 text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
-                        Wir bauen. Du besitzt.
-                      </h3>
-                      <p className="mt-5 max-w-lg text-sm leading-6 text-black/65 sm:text-base sm:leading-7">
-                        Audit, Architektur, Implementierung, Tests und Dokumentation
-                        werden sauber in deiner Infrastruktur übergeben.
-                      </p>
-                      <div className="mt-8 flex flex-wrap gap-2">
-                        {["Audit", "Architektur", "Build", "Handover"].map((item) => (
-                          <span
-                            key={item}
-                            className="rounded-full border border-black/15 px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.14em]"
-                          >
-                            {item}
+                          <span className="hidden text-sm text-zinc-700 sm:inline">
+                            https://
                           </span>
-                        ))}
-                      </div>
-                    </div>
-                  </article>
-                </Reveal>
-
-                <Reveal delay={0.08}>
-                  <article className="relative min-h-[410px] overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-950 p-7 sm:p-10">
-                    <div
-                      className="absolute -bottom-32 -right-20 size-80 rounded-full bg-signal/[0.06] blur-3xl"
-                      aria-hidden="true"
-                    />
-                    <div className="relative flex items-start justify-between">
-                      <span className="grid size-12 place-items-center rounded-2xl border border-white/10 bg-white/[0.04] text-signal">
-                        <ShieldCheck className="size-5" aria-hidden="true" />
-                      </span>
-                      <span className="rounded-full border border-white/10 px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.15em] text-zinc-500">
-                        Optional
-                      </span>
-                    </div>
-                    <div className="relative mt-16">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-signal/70">
-                        Run
-                      </p>
-                      <h3 className="mt-3 text-4xl font-semibold tracking-[-0.045em] text-white sm:text-5xl">
-                        Wir sichern ab. Du entscheidest.
-                      </h3>
-                      <p className="mt-5 max-w-lg text-sm leading-6 text-zinc-400 sm:text-base sm:leading-7">
-                        Monitoring, Fehlerbehebung und Weiterentwicklung lassen sich
-                        modular absichern — ohne dich dauerhaft an uns zu binden.
-                      </p>
-                      <div className="mt-8 flex flex-wrap gap-2">
-                        {["Monitoring", "Incidents", "Optimierung", "SLA"].map((item) => (
-                          <span
-                            key={item}
-                            className="rounded-full border border-white/10 bg-white/[0.025] px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.14em] text-zinc-500"
-                          >
-                            {item}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </article>
-                </Reveal>
-              </div>
-
-              <Reveal delay={0.12}>
-                <div className="mt-4 grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-3">
-                  {[
-                    { icon: Link2, title: "Deine Accounts", copy: "Alle Zugänge bleiben bei dir." },
-                    { icon: PackageCheck, title: "Deine Workflows", copy: "Dokumentiert und übertragbar." },
-                    { icon: Gauge, title: "Deine Entscheidung", copy: "Betrieb nur, wenn du ihn willst." },
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <div key={item.title} className="bg-[#080808] p-6 sm:p-7">
-                        <Icon className="size-4 text-signal" aria-hidden="true" />
-                        <h3 className="mt-4 text-sm font-semibold text-white">
-                          {item.title}
-                        </h3>
-                        <p className="mt-1.5 text-xs leading-5 text-zinc-500">
-                          {item.copy}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </Reveal>
-            </div>
-          </section>
-
-          <section
-            id="blueprint"
-            className="relative px-5 py-24 sm:px-8 sm:py-32 lg:px-12 lg:py-40"
-          >
-            <div
-              className="absolute left-0 top-1/3 h-[420px] w-[420px] rounded-full bg-signal/[0.045] blur-[130px]"
-              aria-hidden="true"
-            />
-            <div className="relative mx-auto grid max-w-[1280px] gap-16 lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:gap-24">
-              <Reveal className="relative mx-auto w-full max-w-[500px] lg:mx-0">
-                <div
-                  className="absolute -inset-8 rounded-[3rem] border border-signal/10 bg-signal/[0.025] blur-2xl"
-                  aria-hidden="true"
-                />
-                <div className="relative -rotate-2 rounded-[1.6rem] border border-white/10 bg-zinc-900 p-4 shadow-[0_30px_100px_rgba(0,0,0,.55)] transition-transform duration-500 hover:rotate-0 sm:p-5">
-                  <div className="relative overflow-hidden rounded-[1.2rem] bg-[#ecece4] p-7 text-black sm:p-9">
-                    <div
-                      className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(#000_1px,transparent_1px),linear-gradient(90deg,#000_1px,transparent_1px)] [background-size:38px_38px]"
-                      aria-hidden="true"
-                    />
-                    <div className="relative flex items-center justify-between border-b border-black/15 pb-5 font-mono text-[8px] uppercase tracking-[0.18em] text-zinc-500">
-                      <span>Westmonks / Field Guide 01</span>
-                      <span>12 Seiten</span>
-                    </div>
-                    <div className="relative pt-16 sm:pt-24">
-                      <span className="inline-flex rounded-full bg-black px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.17em] text-signal">
-                        Shopify Operations · 1.5 MB
-                      </span>
-                      <h3 className="mt-5 text-4xl font-semibold leading-[0.94] tracking-[-0.055em] sm:text-5xl">
-                        Der Automatisierungs-
-                        <span className="block text-zinc-500">Blueprint.</span>
-                      </h3>
-                      <p className="mt-5 max-w-xs text-sm leading-6 text-zinc-600">
-                        20+ Stunden manuelle Arbeit identifizieren, priorisieren und
-                        systematisch eliminieren.
-                      </p>
-                    </div>
-                    <div className="relative mt-16 flex items-end justify-between border-t border-black/15 pt-5 sm:mt-24">
-                      <span className="grid size-12 place-items-center rounded-full bg-signal">
-                        <Download className="size-5" aria-hidden="true" />
-                      </span>
-                      <span className="text-right font-mono text-[8px] uppercase leading-relaxed tracking-[0.14em] text-zinc-500">
-                        Audit · Priorisierung
-                        <br />30-Tage-Roadmap
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Reveal>
-
-              <Reveal delay={0.08}>
-                <SectionKicker index="03">High-Value Lead Magnet</SectionKicker>
-                <h2 className="text-balance text-5xl font-semibold leading-[0.94] tracking-[-0.05em] sm:text-7xl">
-                  Der Automatisierungs-
-                  <span className="block text-zinc-600">Blueprint</span>
-                  <span className="mt-3 block text-xl font-medium tracking-[-0.02em] text-zinc-400 sm:text-3xl">
-                    12 Seiten. Kein Füllmaterial.
-                  </span>
-                </h2>
-                <p className="mt-7 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg sm:leading-8">
-                  Wie du als Shopify-Händler monatlich mehr als 20 Stunden manuelle
-                  Arbeit eliminierst. Kompakt, exakt <strong className="font-medium text-white">1.5 MB</strong> und
-                  für B2B-Entscheider gebaut.
-                </p>
-
-                <ul className="mt-8 grid gap-3 text-sm text-zinc-300 sm:grid-cols-2">
-                  {[
-                    "Prozess-Audit in 15 Minuten",
-                    "Automations-ROI priorisieren",
-                    "Tool- und Workflow-Matrix",
-                    "Konkrete 30-Tage-Roadmap",
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3">
-                      <span className="grid size-5 place-items-center rounded-full bg-signal/10 text-signal">
-                        <Check className="size-3" aria-hidden="true" />
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <form
-                  className="mt-10"
-                  onSubmit={handleBlueprintRequest}
-                  aria-label="Shopify-Automatisierungs-Blueprint anfordern"
-                >
-                  <div className="flex flex-col gap-3 rounded-[1.35rem] border border-white/10 bg-white/[0.035] p-2 sm:flex-row">
-                    <label htmlFor="blueprint-email" className="sr-only">
-                      Geschäftliche E-Mail-Adresse
-                    </label>
-                    <input
-                      id="blueprint-email"
-                      name="email"
-                      type="email"
-                      inputMode="email"
-                      autoComplete="email"
-                      required
-                      placeholder="name@shop.de"
-                      aria-describedby="blueprint-note blueprint-status"
-                      className="min-h-14 min-w-0 flex-1 rounded-xl border border-transparent bg-transparent px-4 text-base text-white placeholder:text-zinc-600 focus:border-signal/30 focus:outline-none"
-                    />
-                    <motion.button
-                      whileHover={{ scale: 1.015 }}
-                      whileTap={{ scale: 0.985 }}
-                      type="submit"
-                      disabled={downloadState === "loading"}
-                      className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-semibold text-black transition-colors hover:bg-signal disabled:cursor-wait disabled:opacity-60"
-                    >
-                      {downloadState === "loading" ? "Wird vorbereitet …" : "Blueprint herunterladen"}
-                      <Download
-                        className="size-4 transition-transform group-hover:translate-y-0.5"
-                        aria-hidden="true"
-                      />
-                    </motion.button>
-                  </div>
-                  <div className="mt-3 flex flex-col gap-2 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
-                    <p id="blueprint-note" className="flex items-center gap-2">
-                      <LockKeyhole className="size-3.5" aria-hidden="true" />
-                      Sofortiger Download. Kein Konto. Kein Spam.
-                    </p>
-                    <p id="blueprint-status" aria-live="polite">
-                      {downloadState === "success" && "Download gestartet."}
-                      {downloadState === "error" &&
-                        "Download fehlgeschlagen. Bitte erneut versuchen."}
-                    </p>
-                  </div>
-                </form>
-              </Reveal>
-            </div>
-          </section>
-
-          <section
-            id="booking"
-            className="border-t border-white/10 px-5 py-24 sm:px-8 sm:py-32 lg:px-12 lg:py-40"
-          >
-            <div className="mx-auto max-w-[1440px]">
-              <Reveal>
-                <div className="grid gap-14 lg:grid-cols-[0.75fr_1.25fr] lg:gap-20">
-                  <div className="lg:sticky lg:top-28 lg:self-start">
-                    <SectionKicker index="04">15-Minuten Strategiegespräch</SectionKicker>
-                    <h2 className="text-balance text-5xl font-semibold leading-[0.92] tracking-[-0.055em] sm:text-7xl lg:text-[5.6rem]">
-                      Schluss mit
-                      <span className="block text-zinc-600">manuellem Aufwand.</span>
-                    </h2>
-                    <p className="mt-7 max-w-xl text-base leading-7 text-zinc-400 sm:text-lg sm:leading-8">
-                      In 15 Minuten identifizieren wir den teuersten manuellen
-                      Prozess in deinem Shopify-Backend und prüfen, ob er sich
-                      wirtschaftlich automatisieren lässt.
-                    </p>
-
-                    <div className="mt-10 divide-y divide-white/10 border-y border-white/10">
-                      {[
-                        "Teuersten operativen Engpass bestimmen",
-                        "Machbarkeit und sinnvollsten Stack klären",
-                        "Nächsten Schritt ohne Standard-Pitch festlegen",
-                      ].map((item, index) => (
-                        <div key={item} className="flex items-center gap-4 py-4 text-sm text-zinc-400">
-                          <span className="font-mono text-[9px] text-signal">0{index + 1}</span>
-                          {item}
+                          <input
+                            id="shop-url"
+                            name="url"
+                            type="text"
+                            inputMode="url"
+                            autoComplete="url"
+                            spellCheck={false}
+                            required
+                            maxLength={300}
+                            value={shopUrl}
+                            onChange={(event) => setShopUrl(event.target.value)}
+                            placeholder="deinshop.de"
+                            aria-describedby="analysis-note analysis-status"
+                            className="min-w-0 flex-1 bg-transparent text-base text-white placeholder:text-zinc-700 focus:outline-none"
+                          />
                         </div>
-                      ))}
-                    </div>
-
-                    <p className="mt-6 flex items-center gap-2 text-xs text-zinc-600">
-                      <Clock3 className="size-3.5 text-signal" aria-hidden="true" />
-                      15 Minuten · Remote · Klarer Fit-or-No-Fit
-                    </p>
+                        <motion.button
+                          whileHover={
+                            analysisState === "loading" ? undefined : { scale: 1.01 }
+                          }
+                          whileTap={
+                            analysisState === "loading"
+                              ? undefined
+                              : { scale: 0.985 }
+                          }
+                          type="submit"
+                          disabled={analysisState === "loading"}
+                          className="group mt-2 inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-signal px-6 text-sm font-semibold text-black transition-colors hover:bg-[#d4ff72] disabled:cursor-wait disabled:opacity-80 sm:text-base"
+                        >
+                          {analysisState === "loading" ? (
+                            <>
+                              <motion.span
+                                animate={{ rotate: 360 }}
+                                transition={{
+                                  duration: 1,
+                                  repeat: Number.POSITIVE_INFINITY,
+                                  ease: "linear",
+                                }}
+                                className="size-4 rounded-full border-2 border-black/25 border-t-black"
+                                aria-hidden="true"
+                              />
+                              Analyse läuft
+                            </>
+                          ) : (
+                            <>
+                              Engpass analysieren
+                              <Sparkles
+                                className="size-4 transition-transform group-hover:rotate-6 group-hover:scale-110"
+                                aria-hidden="true"
+                              />
+                            </>
+                          )}
+                        </motion.button>
+                      </div>
+                      <p
+                        id="analysis-note"
+                        className="mt-3 flex items-start gap-2 text-xs leading-5 text-zinc-600"
+                      >
+                        <ShieldCheck
+                          className="mt-0.5 size-3.5 shrink-0 text-signal"
+                          aria-hidden="true"
+                        />
+                        Deine URL wird ausschließlich über unsere geschützte
+                        Server-Route an Gemini gesendet. Kein API-Key im Browser.
+                      </p>
+                    </form>
                   </div>
 
-                  <div className="relative min-h-[700px] overflow-hidden rounded-[1.75rem] border border-white/10 bg-zinc-950 shadow-[0_30px_100px_rgba(0,0,0,.45)] sm:rounded-[2rem]">
-                    <div className="flex h-14 items-center justify-between border-b border-white/10 px-5 font-mono text-[8px] uppercase tracking-[0.18em] text-zinc-600 sm:px-7 sm:text-[9px]">
-                      <span>Secure booking / Cal.com or Calendly</span>
-                      <span className="flex items-center gap-2 text-signal">
-                        <span className="size-1.5 rounded-full bg-signal shadow-[0_0_12px_rgba(199,255,74,.75)]" />
-                        15 Min
-                      </span>
-                    </div>
-
-                    <iframe
-                      title="15-minütigen Shopify-Automatisierungs-Check buchen"
-                      src={bookingUrl || "about:blank"}
-                      loading="lazy"
-                      className="h-[646px] w-full bg-zinc-950"
-                      allow="camera; microphone; fullscreen; payment"
+                  <div
+                    id="analysis-status"
+                    className="relative min-h-[530px] bg-black/25 p-5 sm:p-8 lg:p-10"
+                    aria-live="polite"
+                    aria-busy={analysisState === "loading"}
+                  >
+                    <div
+                      className="absolute inset-0 opacity-[0.12] [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:48px_48px] [mask-image:linear-gradient(to_bottom,black,transparent)]"
+                      aria-hidden="true"
                     />
 
-                    {!bookingUrl && (
-                      <div className="absolute inset-x-0 bottom-0 top-14 grid place-items-center bg-zinc-950 px-6 text-center">
-                        <div className="max-w-md">
-                          <span className="mx-auto grid size-14 place-items-center rounded-2xl border border-signal/20 bg-signal/[0.06] text-signal">
-                            <ArrowRight className="size-5" aria-hidden="true" />
+                    <AnimatePresence mode="wait">
+                      {analysisState === "idle" && (
+                        <motion.div
+                          key="idle"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0, y: -8 }}
+                          className="relative flex min-h-[470px] flex-col justify-between"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-600">
+                              Analyse-Engine / Bereit
+                            </span>
+                            <Radar
+                              className="size-5 text-signal/70"
+                              aria-hidden="true"
+                            />
+                          </div>
+
+                          <div className="mx-auto max-w-md text-center">
+                            <span className="mx-auto grid size-20 place-items-center rounded-[1.6rem] border border-signal/15 bg-signal/[0.045] text-signal">
+                              <ScanLine className="size-8" aria-hidden="true" />
+                            </span>
+                            <h3 className="mt-7 text-2xl font-semibold tracking-[-0.035em] text-white sm:text-3xl">
+                              Bereit für den Operations Scan.
+                            </h3>
+                            <p className="mt-4 text-sm leading-6 text-zinc-500">
+                              Nach der Analyse siehst du eine realistische
+                              Stundenspanne, den wahrscheinlichsten Engpass und
+                              den sinnvollsten ersten Workflow.
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.07]">
+                            {["Storefront", "Engpass", "Potenzial"].map(
+                              (item, index) => (
+                                <div
+                                  key={item}
+                                  className="bg-[#090909] px-2 py-4 text-center"
+                                >
+                                  <p className="font-mono text-[8px] text-signal">
+                                    0{index + 1}
+                                  </p>
+                                  <p className="mt-1 text-[10px] text-zinc-600 sm:text-xs">
+                                    {item}
+                                  </p>
+                                </div>
+                              ),
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {analysisState === "loading" && (
+                        <motion.div
+                          key="loading"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="relative flex min-h-[470px] flex-col"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-signal">
+                              Live Processing
+                            </span>
+                            <span className="flex items-center gap-2 font-mono text-[8px] uppercase tracking-[0.15em] text-zinc-600">
+                              <span className="size-1.5 animate-pulse rounded-full bg-signal" />
+                              Secure
+                            </span>
+                          </div>
+
+                          <div className="my-auto text-center">
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{
+                                duration: 7,
+                                repeat: Number.POSITIVE_INFINITY,
+                                ease: "linear",
+                              }}
+                              className="relative mx-auto size-28 rounded-full border border-dashed border-signal/35"
+                            >
+                              <span className="absolute left-1/2 top-0 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-signal shadow-[0_0_18px_rgba(199,255,74,.9)]" />
+                            </motion.div>
+                            <Sparkles
+                              className="absolute left-1/2 top-1/2 size-7 -translate-x-1/2 -translate-y-1/2 text-signal"
+                              aria-hidden="true"
+                            />
+                            <h3 className="mt-8 text-balance text-2xl font-semibold tracking-[-0.03em] text-white">
+                              Analysiere Shopify-Backend via Gemini AI...
+                            </h3>
+                            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-zinc-600">
+                              Öffentliche Storefront wird gelesen. Interne Daten
+                              bleiben unangetastet.
+                            </p>
+                          </div>
+
+                          <div className="space-y-2">
+                            {[
+                              "Storefront-Signale erfassen",
+                              "Operations-Muster clustern",
+                              "Automationspotenzial berechnen",
+                            ].map((item, index) => (
+                              <motion.div
+                                key={item}
+                                initial={{ opacity: 0.35 }}
+                                animate={{ opacity: [0.35, 1, 0.35] }}
+                                transition={{
+                                  duration: 1.8,
+                                  delay: index * 0.35,
+                                  repeat: Number.POSITIVE_INFINITY,
+                                }}
+                                className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.025] px-4 py-3"
+                              >
+                                <span className="grid size-6 place-items-center rounded-full bg-signal/[0.08] font-mono text-[8px] text-signal">
+                                  0{index + 1}
+                                </span>
+                                <span className="text-xs text-zinc-500">
+                                  {item}
+                                </span>
+                              </motion.div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {analysisState === "error" && (
+                        <motion.div
+                          key="error"
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          className="relative flex min-h-[470px] flex-col items-center justify-center text-center"
+                          role="alert"
+                        >
+                          <span className="grid size-16 place-items-center rounded-2xl border border-red-400/20 bg-red-400/[0.06] text-red-300">
+                            <CircleAlert className="size-6" aria-hidden="true" />
                           </span>
                           <h3 className="mt-6 text-2xl font-semibold tracking-tight text-white">
-                            Kalender-Embed ist vorbereitet.
+                            Analyse nicht abgeschlossen.
                           </h3>
-                          <p className="mt-3 text-sm leading-6 text-zinc-500">
-                            Hinterlege deine Cal.com- oder Calendly-URL als
-                            <code className="mx-1 rounded bg-white/[0.05] px-1.5 py-0.5 font-mono text-[11px] text-zinc-300">
-                              NEXT_PUBLIC_BOOKING_URL
-                            </code>
-                            in Vercel. Das Dark-Mode-Embed erscheint automatisch.
+                          <p className="mt-3 max-w-md text-sm leading-6 text-zinc-500">
+                            {analysisError}
                           </p>
-                        </div>
-                      </div>
-                    )}
+                          <button
+                            type="button"
+                            onClick={() => setAnalysisState("idle")}
+                            className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-full border border-white/10 px-5 text-sm font-medium text-zinc-300 transition-colors hover:border-signal/30 hover:text-white"
+                          >
+                            <RotateCcw className="size-4" aria-hidden="true" />
+                            Erneut versuchen
+                          </button>
+                        </motion.div>
+                      )}
+
+                      {analysisState === "success" && analysis && (
+                        <motion.div
+                          key="success"
+                          initial={{ opacity: 0, y: 14 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          className="relative"
+                        >
+                          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                              <p className="font-mono text-[8px] uppercase tracking-[0.17em] text-signal">
+                                Analyse abgeschlossen
+                              </p>
+                              <h3 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-white sm:text-2xl">
+                                {analysis.shopName}
+                              </h3>
+                              <p className="mt-1 truncate text-xs text-zinc-600">
+                                {analysis.analyzedUrl}
+                              </p>
+                            </div>
+                            <span className="w-fit rounded-full border border-signal/20 bg-signal/[0.06] px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.15em] text-signal">
+                              {confidenceLabel[analysis.confidence]}
+                            </span>
+                          </div>
+
+                          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                            <div className="rounded-2xl border border-signal/15 bg-signal/[0.05] p-5">
+                              <p className="font-mono text-[8px] uppercase tracking-[0.17em] text-zinc-600">
+                                Geschätztes Potenzial
+                              </p>
+                              <p className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-white">
+                                {
+                                  analysis.estimatedManualHoursPerMonth
+                                    .minimum
+                                }
+                                –
+                                {
+                                  analysis.estimatedManualHoursPerMonth
+                                    .maximum
+                                }
+                                <span className="ml-2 text-base font-medium tracking-normal text-zinc-500">
+                                  Std. / Monat
+                                </span>
+                              </p>
+                            </div>
+                            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
+                              <p className="font-mono text-[8px] uppercase tracking-[0.17em] text-zinc-600">
+                                Shopify-Wahrscheinlichkeit
+                              </p>
+                              <p className="mt-3 text-2xl font-semibold capitalize tracking-[-0.03em] text-white">
+                                {analysis.shopifyLikelihood}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="mt-3 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
+                            <div className="flex items-center justify-between gap-4">
+                              <p className="font-mono text-[8px] uppercase tracking-[0.17em] text-zinc-600">
+                                Primärer Engpass
+                              </p>
+                              <span className="rounded-full border border-white/10 px-2.5 py-1 font-mono text-[7px] uppercase tracking-[0.13em] text-zinc-500">
+                                {analysis.primaryBottleneck.category}
+                              </span>
+                            </div>
+                            <h4 className="mt-3 text-xl font-semibold tracking-[-0.025em] text-white">
+                              {analysis.primaryBottleneck.title}
+                            </h4>
+                            <p className="mt-3 text-sm leading-6 text-zinc-500">
+                              {analysis.primaryBottleneck.diagnosis}
+                            </p>
+                          </div>
+
+                          <div className="mt-3 rounded-2xl bg-signal p-5 text-black">
+                            <p className="font-mono text-[8px] uppercase tracking-[0.17em] text-black/50">
+                              Empfohlener erster Workflow
+                            </p>
+                            <p className="mt-3 text-sm font-medium leading-6">
+                              {analysis.recommendedAutomation}
+                            </p>
+                          </div>
+
+                          <div className="mt-5">
+                            <p className="font-mono text-[8px] uppercase tracking-[0.17em] text-zinc-600">
+                              Öffentliche Signale
+                            </p>
+                            <ul className="mt-3 space-y-2">
+                              {analysis.publicSignals.map((signal) => (
+                                <li
+                                  key={signal}
+                                  className="flex items-start gap-2 text-xs leading-5 text-zinc-500"
+                                >
+                                  <Check
+                                    className="mt-0.5 size-3.5 shrink-0 text-signal"
+                                    aria-hidden="true"
+                                  />
+                                  {signal}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <p className="mt-5 border-t border-white/[0.07] pt-4 text-[10px] leading-5 text-zinc-700">
+                            {analysis.disclaimer}
+                          </p>
+
+                          <button
+                            type="button"
+                            onClick={resetAnalysis}
+                            className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-zinc-500 transition-colors hover:text-white"
+                          >
+                            <RotateCcw className="size-3.5" aria-hidden="true" />
+                            Anderen Shop analysieren
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
-              </Reveal>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        <section
+          id="system"
+          className="relative px-5 py-24 sm:px-8 sm:py-32 lg:px-12 lg:py-40"
+        >
+          <div className="mx-auto grid max-w-[1440px] gap-14 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
+            <Reveal className="lg:sticky lg:top-28 lg:h-fit">
+              <SectionKicker index="02">Die Kern-Engine</SectionKicker>
+              <h2 className="text-balance text-5xl font-semibold leading-[0.92] tracking-[-0.05em] sm:text-7xl lg:text-[5.6rem]">
+                Das Shopify-
+                <span className="block text-zinc-600">Betriebssystem</span>
+              </h2>
+              <p className="mt-7 max-w-xl text-base leading-7 text-zinc-400 sm:text-lg sm:leading-8">
+                Kein Sammelsurium aus einzelnen Zaps. Ein kontrollierter
+                Datenfluss, in dem Bestellungen, Finanzen, Bestand, Support und
+                Fulfillment zuverlässig ineinandergreifen.
+              </p>
+
+              <div className="mt-10 hidden rounded-2xl border border-white/10 bg-white/[0.025] p-5 lg:block">
+                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-600">
+                  Ein Ereignis. Ein definierter Ablauf.
+                </p>
+                <div className="mt-4 flex items-center gap-3 text-xs text-zinc-400">
+                  <span>Shopify Event</span>
+                  <ArrowRight
+                    className="size-3.5 text-signal"
+                    aria-hidden="true"
+                  />
+                  <span>Orchestration</span>
+                  <ArrowRight
+                    className="size-3.5 text-signal"
+                    aria-hidden="true"
+                  />
+                  <span>Ergebnis</span>
+                </div>
+              </div>
+            </Reveal>
+
+            <div className="relative">
+              <div
+                className="absolute bottom-16 left-[25px] top-16 w-px bg-[linear-gradient(180deg,transparent,rgba(199,255,74,.38),transparent)] sm:left-[33px]"
+                aria-hidden="true"
+              />
+
+              <div className="space-y-5">
+                {modules.map((module, index) => {
+                  const Icon = module.icon;
+                  return (
+                    <Reveal key={module.title} delay={index * 0.08}>
+                      <motion.article
+                        whileHover={{ y: -4 }}
+                        transition={{ duration: 0.25 }}
+                        className="group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-zinc-950/80 p-5 transition-colors hover:border-signal/25 sm:rounded-[2rem] sm:p-8"
+                      >
+                        <div
+                          className="absolute -right-20 -top-20 size-64 rounded-full bg-signal/0 blur-3xl transition-colors duration-500 group-hover:bg-signal/[0.055]"
+                          aria-hidden="true"
+                        />
+
+                        <div className="relative grid gap-6 sm:grid-cols-[68px_1fr] sm:gap-8">
+                          <div className="relative z-10 flex items-start justify-between sm:block">
+                            <span className="grid size-[52px] place-items-center rounded-2xl border border-signal/20 bg-signal/[0.07] text-signal sm:size-[68px] sm:rounded-[1.35rem]">
+                              <Icon
+                                className="size-5 sm:size-6"
+                                aria-hidden="true"
+                              />
+                            </span>
+                            <span className="font-mono text-[9px] text-zinc-700 sm:mt-5 sm:block sm:text-center">
+                              {module.number} / 03
+                            </span>
+                          </div>
+
+                          <div>
+                            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-signal/70">
+                              {module.eyebrow}
+                            </p>
+                            <h3 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">
+                              {module.title}
+                            </h3>
+                            <p className="mt-5 max-w-2xl text-[15px] leading-7 text-zinc-400 sm:text-base">
+                              {module.copy}
+                            </p>
+
+                            <div className="mt-7 flex flex-wrap gap-2">
+                              {module.tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.13em] text-zinc-500"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="relative mt-7 grid gap-2 rounded-xl border border-white/[0.07] bg-black/35 p-3 sm:ml-[100px] sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:p-4">
+                          <div>
+                            <p className="font-mono text-[8px] uppercase tracking-[0.17em] text-zinc-700">
+                              Trigger
+                            </p>
+                            <p className="mt-1 text-xs font-medium text-zinc-300 sm:text-sm">
+                              {module.trigger}
+                            </p>
+                          </div>
+                          <div
+                            className="hidden items-center gap-1 sm:flex"
+                            aria-hidden="true"
+                          >
+                            <span className="h-px w-6 bg-white/10" />
+                            <span className="grid size-7 place-items-center rounded-full border border-signal/20 bg-signal/[0.07]">
+                              <Zap className="size-3 text-signal" />
+                            </span>
+                            <span className="h-px w-6 bg-white/10" />
+                          </div>
+                          <div className="sm:text-right">
+                            <p className="font-mono text-[8px] uppercase tracking-[0.17em] text-zinc-700">
+                              Ergebnis
+                            </p>
+                            <p className="mt-1 text-xs font-medium text-zinc-300 sm:text-sm">
+                              {module.result}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.article>
+                    </Reveal>
+                  );
+                })}
+              </div>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
+
+        <section className="border-t border-white/10 px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
+          <Reveal>
+            <div className="relative mx-auto max-w-[1320px] overflow-hidden rounded-[2rem] border border-signal/15 bg-[#080808] px-6 py-12 sm:px-12 sm:py-16 lg:px-16 lg:py-20">
+              <div
+                className="absolute -right-32 -top-32 size-[420px] rounded-full bg-signal/[0.09] blur-[100px]"
+                aria-hidden="true"
+              />
+              <div
+                className="absolute inset-0 opacity-[0.12] [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:linear-gradient(90deg,black,transparent)]"
+                aria-hidden="true"
+              />
+
+              <div className="relative grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
+                <div>
+                  <SectionKicker index="03">Der nächste Schritt</SectionKicker>
+                  <h2 className="max-w-4xl text-balance text-4xl font-semibold leading-[0.95] tracking-[-0.05em] sm:text-6xl lg:text-7xl">
+                    Automatisiere nicht alles.
+                    <span className="block text-zinc-600">
+                      Automatisiere das Richtige.
+                    </span>
+                  </h2>
+                  <p className="mt-6 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
+                    Starte mit einer belastbaren Hypothese. Wir bauen das
+                    passende System anschließend in deinem Workspace — sauber
+                    dokumentiert und zu 100% in deinem Besitz.
+                  </p>
+                </div>
+
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.985 }}
+                  href="#analyse"
+                  className="group inline-flex min-h-14 w-fit items-center justify-center gap-3 rounded-full bg-signal px-7 text-sm font-semibold text-black shadow-signal sm:text-base"
+                >
+                  Shop jetzt analysieren
+                  <ArrowRight
+                    className="size-4 transition-transform group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
+                </motion.a>
+              </div>
+
+              <div className="relative mt-10 flex flex-wrap gap-x-7 gap-y-3 border-t border-white/10 pt-6 text-xs text-zinc-600">
+                {[
+                  "Keine Support-Falle",
+                  "Kein versteckter Lock-in",
+                  "Optionaler SLA-Betrieb",
+                ].map((item) => (
+                  <span key={item} className="flex items-center gap-2">
+                    <Check className="size-3.5 text-signal" aria-hidden="true" />
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        </section>
 
         <footer className="border-t border-white/10 px-5 py-7 sm:px-8 lg:px-12">
           <div className="mx-auto flex max-w-[1440px] flex-col gap-5 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
