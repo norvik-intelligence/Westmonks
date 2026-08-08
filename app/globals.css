@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
-  --background: #050505;
-  --foreground: #f4f4ef;
-  --signal: #c7ff4a;
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #18181b;
+  --signal: #059669;
 }
 
 * {
@@ -45,7 +45,7 @@ input:focus-visible {
 
 ::selection {
   background: var(--signal);
-  color: #050505;
+  color: #ffffff;
 }
 
 .text-balance {
@@ -54,8 +54,8 @@ input:focus-visible {
 
 .grid-surface {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    linear-gradient(rgba(24, 24, 27, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24, 24, 27, 0.045) 1px, transparent 1px);
   background-size: 52px 52px;
   mask-image: linear-gradient(to bottom, black 0%, transparent 78%);
 }
@@ -74,7 +74,7 @@ input:focus-visible {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(199, 255, 74, 0.7),
+    rgba(5, 150, 105, 0.65),
     transparent
   );
 }
