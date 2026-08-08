@@ -246,6 +246,58 @@ export const industries: Industry[] = [
     complianceNote:
       "Bei zwei Zahlungsbeteiligten ist die Belegzuordnung kein Detail, sondern die Grundlage der gesamten Buchhaltung.",
   },
+  {
+    slug: "fashion-mode",
+    name: "Mode & Fashion",
+    audience: "Fashion-Händler",
+    orderProfile:
+      "Viele Bestellungen mit kleinem bis mittlerem Warenkorb, aber einem sehr hohen Varianten-Anteil aus Größe mal Farbe – und einer Retourenquote, die in keiner anderen Branche so hoch liegt.",
+    volumeSignal:
+      "Typisch sind 500 bis 8.000 Bestellungen im Monat bei einer Retourenquote, die je nach Sortiment zwischen 30 und 60 Prozent liegt.",
+    painPoints: [
+      "Jede Retoure erzeugt Nacharbeit an drei Stellen gleichzeitig: Gutschrift in der Buchhaltung, Rückbuchung in den Bestand und eine Statusmeldung an den Kunden. Läuft einer der drei Schritte manuell, laufen alle drei auseinander.",
+      "Teilretouren aus einer Bestellung mit Rabattcode sind der Klassiker: Wie viel Rabatt entfällt auf den zurückgeschickten Artikel, und wie viel Versandkosten werden anteilig erstattet?",
+      "Der Größentausch ist wirtschaftlich ein Vorgang, technisch aber eine Retoure plus eine Neubestellung – und wird deshalb doppelt gezählt, in der Marge wie in der Statistik.",
+    ],
+    edgeCases: [
+      "Teilretoure mit anteiliger Aufteilung von Rabatt und Versandkosten",
+      "Größentausch als ein Vorgang statt Retoure plus Neubestellung",
+      "Retoure trifft ein, bevor die Gutschrift gebucht ist – Bestand und Buchhaltung stehen auseinander",
+    ],
+    publicSignals: [
+      "Größentabelle und Varianten-Picker mit Größe mal Farbe",
+      "Kostenloses Rücksendelabel oder Retourenportal",
+      "Saisonale Sale-Kategorien mit gestaffelten Rabatten",
+    ],
+    complianceNote:
+      "Widerrufsrecht und Gewährleistung geben vor, was bei einer Retoure zu erstatten ist und was nicht. Wie das in deinem Sortiment auszulegen ist, klärt deine Rechtsberatung – wir bilden die Regel ab, die daraus folgt.",
+  },
+  {
+    slug: "b2b-grosshandel",
+    name: "B2B-Onlineshops",
+    audience: "B2B-Händler",
+    orderProfile:
+      "Wiederkehrende Bestellungen bekannter Geschäftskunden auf Rechnung, mit Zahlungszielen, kundenindividuellen Preisen und Nettopreis-Darstellung statt Endkundenlogik.",
+    volumeSignal:
+      "Typisch sind 100 bis 1.500 Bestellungen im Monat bei stark schwankendem Warenkorb, weil Nachbestellungen und Rahmenabrufe nebeneinander laufen.",
+    painPoints: [
+      "Die USt-IdNr. des Kunden entscheidet über die Besteuerung, wird aber selten qualifiziert geprüft – und im Zweifel haftet der Händler für die Umsatzsteuer, die er nicht ausgewiesen hat.",
+      "Rechnungskauf mit Zahlungsziel bedeutet Mahnwesen. Ohne Anbindung an die Buchhaltung merkt niemand, dass eine Rechnung seit sechs Wochen offen ist.",
+      "Kundenindividuelle Preislisten und Staffelpreise werden im Shop gepflegt, in der Buchhaltung aber nochmal – zwei Quellen für denselben Preis sind eine Quelle für Differenzen.",
+    ],
+    edgeCases: [
+      "Innergemeinschaftliche Lieferung mit qualifizierter Bestätigung der USt-IdNr. nach § 18e UStG",
+      "Sammelrechnung zum Monatsende über mehrere Einzellieferungen",
+      "Abweichende Preisliste je Kundengruppe bei identischem Artikel",
+    ],
+    publicSignals: [
+      "Preise erst nach Login sichtbar, Nettopreis-Darstellung",
+      "Mindestbestellwert oder Staffelpreise ab Menge",
+      "Zahlungsart Rechnungskauf für registrierte Kunden",
+    ],
+    complianceNote:
+      "Reverse-Charge und innergemeinschaftliche Lieferungen sind steuerlich der heikelste Teil im B2B-Handel. Die Bewertung im Einzelfall gehört zu deinem Steuerberater – wir sorgen dafür, dass seine Vorgabe im System konsequent greift statt nur im Kopf der Buchhaltung.",
+  },
 ];
 
 export const tools: Tool[] = [
@@ -334,6 +386,34 @@ export const tools: Tool[] = [
     integrationNote:
       "Flow ist kostenlos und für viele Aufgaben völlig ausreichend. Wir prüfen zuerst, ob dein Fall damit lösbar ist, bevor wir etwas Größeres bauen.",
   },
+  {
+    slug: "sevdesk",
+    name: "sevDesk",
+    category: "Buchhaltung",
+    covers:
+      "Belege zu abgeschlossenen Bestellungen erzeugen, Zahlungen über den Bankabgleich zuordnen und den Datenbestand für den Steuerberater vorbereiten.",
+    limits: [
+      "Retourengutschriften, die sich auf einen Teil einer Bestellung beziehen",
+      "Wiederkehrende Sammelbelege über mehrere Lieferungen desselben Kunden",
+      "Abweichende Erlöskonten je Warengruppe innerhalb einer Bestellung",
+    ],
+    integrationNote:
+      "sevDesk und Lexware Office lösen dieselbe Aufgabe mit unterschiedlichem Zuschnitt. Wir bauen auf dem Tool auf, das bei dir bereits läuft – ein Wechsel lohnt sich fast nie allein wegen der Anbindung.",
+  },
+  {
+    slug: "datev",
+    name: "DATEV",
+    category: "Buchhaltung",
+    covers:
+      "Die Übergabe an die Steuerkanzlei im erwarteten Format – Buchungsstapel auf dem vereinbarten Kontenrahmen, sauber getrennt nach Steuerschlüsseln.",
+    limits: [
+      "Es gibt keine direkte Shop-Anbindung – die Buchungslogik muss stehen, bevor exportiert wird",
+      "Korrekturen nach dem Export sind aufwendig, weil die Kanzlei bereits verarbeitet hat",
+      "Zuordnung von Zahlungsdienstleister-Auszahlungen zu einzelnen Bestellungen",
+    ],
+    integrationNote:
+      "Beim DATEV-Export entscheidet sich nichts mehr – er macht nur sichtbar, ob die Buchungslogik davor stimmt. Wir setzen deshalb eine Stufe früher an und stimmen den Kontenrahmen vorher mit deiner Kanzlei ab.",
+  },
 ];
 
 /** Kuratierte Kombinationen – bewusst nicht vollständig gekreuzt. */
@@ -346,6 +426,10 @@ const pairings: Record<string, string[]> = {
   "werkzeug-industriebedarf": ["lexoffice", "n8n", "billbee"],
   "beauty-kosmetik": ["klaviyo", "shopify-flow", "make"],
   "fahrrad-e-mobility": ["lexoffice", "n8n", "shopify-flow"],
+  // Neue Branchen bewusst mit je einem Tool pro Kategorie: zwei
+  // Buchhaltungstools zur selben Branche ergaeben zwei fast gleiche Seiten.
+  "fashion-mode": ["sevdesk", "billbee", "klaviyo"],
+  "b2b-grosshandel": ["datev", "billbee", "n8n"],
 };
 
 export type Solution = {
