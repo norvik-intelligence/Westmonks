@@ -11,7 +11,7 @@ const config: Config = {
       colors: {
         ink: "#18181b",
         paper: "#ffffff",
-        signal: "#059669",
+        signal: "#c9ff3d",
       },
       fontFamily: {
         sans: [
@@ -32,7 +32,7 @@ const config: Config = {
         tighter: "-0.045em",
       },
       boxShadow: {
-        signal: "0 0 0 1px rgba(5,150,105,.12), 0 26px 90px rgba(5,150,105,.12)",
+        signal: "0 0 0 1px rgba(201,255,61,.2), 0 26px 90px rgba(154,220,0,.18)",
       },
     },
   },

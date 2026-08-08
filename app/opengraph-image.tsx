@@ -13,7 +13,7 @@ export default function OpenGraphImage() {
         width: "100%",
         height: "100%",
         overflow: "hidden",
-        background: "#ffffff",
+        background: "#d8f4ff",
         color: "#18181b",
         fontFamily: "Arial, sans-serif",
       }}
@@ -23,7 +23,7 @@ export default function OpenGraphImage() {
           position: "absolute",
           inset: 0,
           display: "flex",
-          opacity: 0.55,
+          opacity: 0.35,
           backgroundImage:
             "linear-gradient(rgba(24,24,27,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(24,24,27,.08) 1px,transparent 1px)",
           backgroundSize: "52px 52px",
@@ -32,14 +32,14 @@ export default function OpenGraphImage() {
       <div
         style={{
           position: "absolute",
-          right: 70,
-          top: 72,
+          right: -50,
+          top: -40,
           display: "flex",
           width: 360,
           height: 360,
           borderRadius: 999,
-          background: "rgba(5,150,105,.09)",
-          border: "1px solid rgba(5,150,105,.18)",
+          background: "rgba(0,171,235,.16)",
+          border: "1px solid rgba(0,138,190,.18)",
         }}
       />
       <div
@@ -68,7 +68,8 @@ export default function OpenGraphImage() {
               width: 12,
               height: 12,
               borderRadius: 999,
-              background: "#059669",
+              background: "#c9ff3d",
+              border: "2px solid #18181b",
             }}
           />
           WESTMONKS
@@ -78,7 +79,7 @@ export default function OpenGraphImage() {
             style={{
               display: "flex",
               marginBottom: 22,
-              color: "#059669",
+              color: "#08769d",
               fontSize: 16,
               letterSpacing: 3,
             }}
@@ -95,13 +96,13 @@ export default function OpenGraphImage() {
               letterSpacing: -4.5,
             }}
           >
-            Dein Store wächst. Das Chaos nicht.
+            Das System hinter deinem Shopify-Wachstum.
           </div>
           <div
             style={{
               display: "flex",
               marginTop: 22,
-              color: "#71717a",
+              color: "#3f5963",
               fontSize: 26,
             }}
           >

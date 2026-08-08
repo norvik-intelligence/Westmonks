@@ -6,7 +6,7 @@
   color-scheme: light;
   --background: #ffffff;
   --foreground: #18181b;
-  --signal: #059669;
+  --signal: #b8ef2b;
 }
 
 * {
@@ -45,7 +45,7 @@ input:focus-visible {
 
 ::selection {
   background: var(--signal);
-  color: #ffffff;
+  color: #09090b;
 }
 
 .text-balance {
@@ -74,7 +74,7 @@ input:focus-visible {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(5, 150, 105, 0.65),
+    rgba(184, 239, 43, 0.7),
     transparent
   );
 }
