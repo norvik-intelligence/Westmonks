@@ -33,7 +33,15 @@ Optional:
   omitted, the PDF downloads locally and the email is not transmitted.
 
 The included lead magnet is served from
-`/automatisierungs-blueprint.pdf` and is exactly 1,500,000 bytes.
+`/automatisierungs-blueprint.pdf` and is exactly 1,500,000 bytes. Its three
+binary source chunks are assembled byte-for-byte by a Node.js route so the
+download stays stable across GitHub and Vercel.
+
+Regenerate the PDF and delivery chunks with:
+
+```bash
+python3 scripts/generate_blueprint.py
+```
 
 ## Deploy
 
