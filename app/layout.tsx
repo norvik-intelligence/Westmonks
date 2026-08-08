@@ -1,44 +1,41 @@
 import type { Metadata, Viewport } from "next";
 
+import { site, siteUrl } from "@/lib/site";
 import "./globals.css";
-
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://westmonks.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Westmonks — Shopify Operations & Automation",
-    template: "%s | Westmonks",
+    default: `${site.name} — Shopify Operations & Automatisierung`,
+    template: `%s | ${site.name}`,
   },
-  description:
-    "Maßgeschneiderte Backend-Automatisierungen für wachsende Shopify-Stores: Rechnungen, Bestand, Support und Fulfillment ohne manuelles Chaos.",
-  keywords: [
-    "Shopify Automatisierung",
-    "Shopify Backend Automation",
-    "Shopify Bestandsabgleich",
-    "Shopify Kundenservice",
-    "Shopify Fulfillment Automation",
-    "E-Commerce Operations",
-  ],
+  description: site.description,
+  applicationName: site.name,
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Westmonks — Shopify Operations & Automation",
+    title: `${site.name} — Shopify Operations & Automatisierung`,
     description:
-      "Wir beseitigen manuelles Chaos in Shopify-Stores durch intelligente Backend-Automatisierungen und klare Operations-Systeme.",
+      "Wir beseitigen manuelles Chaos in Shopify-Stores durch belastbare Backend-Systeme — inklusive der Sonderfälle, an denen fertige Apps aufhören.",
     type: "website",
     locale: "de_DE",
     url: "/",
-    siteName: "Westmonks",
+    siteName: site.name,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Westmonks — Shopify Operations & Automation",
+    title: `${site.name} — Shopify Operations & Automatisierung`,
     description:
       "Rechnungen, Bestand, Support und Fulfillment — automatisiert statt manuell.",
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 

@@ -52,46 +52,6 @@ input:focus-visible {
   text-wrap: balance;
 }
 
-.grid-surface {
-  background-image:
-    linear-gradient(rgba(24, 24, 27, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(24, 24, 27, 0.045) 1px, transparent 1px);
-  background-size: 52px 52px;
-  mask-image: linear-gradient(to bottom, black 0%, transparent 78%);
-}
-
-.noise::after {
-  position: fixed;
-  z-index: 80;
-  inset: 0;
-  pointer-events: none;
-  content: "";
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
-}
-
-.signal-line {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(184, 239, 43, 0.7),
-    transparent
-  );
-}
-
-.hero-video {
-  pointer-events: none;
-  filter: saturate(0.9) contrast(1.08);
-}
-
-.hide-scrollbar {
-  scrollbar-width: none;
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -104,9 +64,5 @@ input:focus-visible {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
-  }
-
-  .hero-video {
-    display: none;
   }
 }
