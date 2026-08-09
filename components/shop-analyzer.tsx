@@ -18,12 +18,22 @@ import { ContactForm } from "@/components/contact-form";
 
 type ConfidenceLevel = "hoch" | "mittel" | "niedrig";
 
+type AuditFinding = {
+  area: string;
+  status: "kritisch" | "warnung" | "optimiert";
+  finding: string;
+  impact: string;
+  recommendedSolution: string;
+};
+
 type AnalysisResult = {
   analyzedUrl: string;
   shopName: string;
   shopifyLikelihood: ConfidenceLevel;
   estimatedManualHoursPerMonth: { minimum: number; maximum: number };
   primaryBottleneck: { category: string; title: string; diagnosis: string };
+  auditFindings: AuditFinding[];
+  overallHealthScore: number;
   recommendedAutomation: string;
   publicSignals: string[];
   confidence: ConfidenceLevel;
@@ -253,7 +263,7 @@ export function ShopAnalyzer() {
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="inline-flex items-center gap-2 rounded-full bg-[#c9ff3d] px-3 py-1.5 text-xs font-bold text-black">
-                    <Check className="size-3.5" /> Analyse abgeschlossen
+                    <Check className="size-3.5" /> Audit abgeschlossen
                   </span>
                   <span className="text-xs text-zinc-500">
                     {confidenceLabel[analysis.confidence]}
@@ -280,23 +290,13 @@ export function ShopAnalyzer() {
                   </div>
                   <div className="rounded-2xl bg-[#c9ff3d] p-5 text-black">
                     <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-700">
-                      Erster Hebel
+                      Health-Score
                     </p>
-                    <p className="mt-2 text-sm font-medium leading-6">
-                      {analysis.recommendedAutomation}
+                    <p className="mt-2 text-3xl font-semibold">
+                      {analysis.overallHealthScore}%
                     </p>
                   </div>
                 </div>
-                {analysis.publicSignals.length > 0 && (
-                  <ul className="mt-5 space-y-2 text-sm text-zinc-400">
-                    {analysis.publicSignals.map((signal) => (
-                      <li key={signal} className="flex gap-2">
-                        <span className="text-[#c9ff3d]">·</span>
-                        {signal}
-                      </li>
-                    ))}
-                  </ul>
-                )}
                 <p className="mt-5 text-xs leading-5 text-zinc-600">
                   {analysis.disclaimer}
                 </p>
@@ -322,37 +322,105 @@ export function ShopAnalyzer() {
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             className="border-t border-zinc-200 bg-white"
           >
-            <div className="grid gap-10 p-6 sm:p-10 lg:grid-cols-[.8fr_1.2fr] lg:p-12">
+            {/* Audit-Dashboard */}
+            <div className="px-6 py-10 sm:px-10 lg:px-12 lg:py-12">
               <div>
                 <span className="text-xs font-bold uppercase tracking-[0.14em] text-sky-600">
-                  Nächster Schritt
+                  Audit-Dashboard
                 </span>
                 <h3 className="mt-4 text-3xl font-semibold tracking-[-0.04em]">
-                  Den Engpass sauber beseitigen.
+                  Wo es wirklich zwickt.
                 </h3>
                 <p className="mt-4 leading-7 text-zinc-600">
-                  Kein Standardpaket und kein langfristiger Tool-Vertrag. Du
-                  erhältst ein fixes, klar abgegrenztes Setup für deinen
-                  tatsächlichen Prozess.
+                  Diese Befunde basieren auf den öffentlich sichtbaren Signalen
+                  deines Shops. Jeder Punkt zeigt auf eine konkrete, lösbare
+                  Schmerzstelle.
                 </p>
-                <ul className="mt-6 space-y-3 text-sm text-zinc-700">
-                  {[
-                    "Individuelle Systemarchitektur",
-                    "Aufbau in deinem Workspace",
-                    "Saubere Übergabe ohne Lock-in",
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3">
-                      <span className="grid size-6 place-items-center rounded-full bg-[#c9ff3d] text-black">
-                        <Check className="size-3.5" />
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
               </div>
-              <ContactForm
-                context={`Analyse ${analysis.analyzedUrl} · ${analysis.primaryBottleneck.title} · ${analysis.estimatedManualHoursPerMonth.minimum}-${analysis.estimatedManualHoursPerMonth.maximum} Std./Monat`}
-              />
+
+              {/* Findings Grid */}
+              <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {analysis.auditFindings.map((finding, idx: number) => {
+                  const statusColor: Record<string, string> = {
+                    kritisch: "bg-red-50 border-red-200",
+                    warnung: "bg-amber-50 border-amber-200",
+                    optimiert: "bg-emerald-50 border-emerald-200",
+                  };
+                  const statusDot: Record<string, string> = {
+                    kritisch: "bg-red-500",
+                    warnung: "bg-amber-500",
+                    optimiert: "bg-emerald-500",
+                  };
+
+                  return (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className={`rounded-2xl border p-5 ${statusColor[finding.status] || "bg-zinc-50 border-zinc-200"}`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.1em] text-zinc-600">
+                            {finding.area}
+                          </p>
+                          <h4 className="mt-2 text-base font-semibold text-zinc-950">
+                            {finding.finding}
+                          </h4>
+                        </div>
+                        <span
+                          className={`mt-0.5 size-3 shrink-0 rounded-full ${statusDot[finding.status] || "bg-zinc-400"}`}
+                        />
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-zinc-700">
+                        {finding.impact}
+                      </p>
+                      {finding.recommendedSolution !== "Keine" && (
+                        <p className="mt-3 rounded-lg bg-white/60 px-3 py-2 text-xs font-medium text-zinc-700">
+                          💡 {finding.recommendedSolution}
+                        </p>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="border-t border-zinc-200 bg-gradient-to-br from-zinc-50 to-white">
+              <div className="grid gap-10 p-6 sm:p-10 lg:grid-cols-[.8fr_1.2fr] lg:p-12">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-sky-600">
+                    Nächster Schritt
+                  </span>
+                  <h3 className="mt-4 text-3xl font-semibold tracking-[-0.04em]">
+                    Alle Befunde gleichzeitig lösen.
+                  </h3>
+                  <p className="mt-4 leading-7 text-zinc-600">
+                    Kein Standardpaket und kein langfristiger Tool-Vertrag. Du
+                    erhältst ein fixes, klar abgegrenztes Setup für deinen
+                    tatsächlichen Prozess – von Audit über Build bis Übergabe.
+                  </p>
+                  <ul className="mt-6 space-y-3 text-sm text-zinc-700">
+                    {[
+                      "Audit deiner realen Bestelldaten",
+                      "Custom-Setup in deinem Workspace",
+                      "Saubere Übergabe ohne Lock-in",
+                    ].map((item) => (
+                      <li key={item} className="flex items-center gap-3">
+                        <span className="grid size-6 place-items-center rounded-full bg-[#c9ff3d] text-black">
+                          <Check className="size-3.5" />
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <ContactForm
+                  context={`Audit ${analysis.analyzedUrl} · ${analysis.shopName} · Health ${analysis.overallHealthScore}% · ${analysis.primaryBottleneck.title}`}
+                />
+              </div>
             </div>
           </motion.div>
         )}
