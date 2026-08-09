@@ -6,12 +6,15 @@ import {
   Bot,
   Check,
   CircleAlert,
+  Clock,
   LineChart,
   LoaderCircle,
   LockKeyhole,
   RotateCcw,
   ShieldCheck,
   Sparkles,
+  TriangleAlert,
+  Zap,
 } from "lucide-react";
 
 import { ContactForm } from "@/components/contact-form";
@@ -261,52 +264,7 @@ export function ShopAnalyzer() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
               >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-[#c9ff3d] px-3 py-1.5 text-xs font-bold text-black">
-                    <Check className="size-3.5" /> Audit abgeschlossen
-                  </span>
-                  <span className="text-xs text-zinc-500">
-                    {confidenceLabel[analysis.confidence]}
-                  </span>
-                </div>
-                <p className="mt-7 text-sm font-medium text-zinc-500">
-                  {analysis.shopName}
-                </p>
-                <h3 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">
-                  {analysis.primaryBottleneck.title}
-                </h3>
-                <p className="mt-4 leading-7 text-zinc-400">
-                  {analysis.primaryBottleneck.diagnosis}
-                </p>
-                <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/15 p-5">
-                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-500">
-                      Potenzial / Monat
-                    </p>
-                    <p className="mt-2 text-3xl font-semibold">
-                      {analysis.estimatedManualHoursPerMonth.minimum}–
-                      {analysis.estimatedManualHoursPerMonth.maximum} Std.
-                    </p>
-                  </div>
-                  <div className="rounded-2xl bg-[#c9ff3d] p-5 text-black">
-                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-700">
-                      Health-Score
-                    </p>
-                    <p className="mt-2 text-3xl font-semibold">
-                      {analysis.overallHealthScore}%
-                    </p>
-                  </div>
-                </div>
-                <p className="mt-5 text-xs leading-5 text-zinc-600">
-                  {analysis.disclaimer}
-                </p>
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-zinc-400 hover:text-white"
-                >
-                  <RotateCcw className="size-4" /> Anderen Shop prüfen
-                </button>
+                <AuditReport analysis={analysis} onReset={reset} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -322,73 +280,8 @@ export function ShopAnalyzer() {
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             className="border-t border-zinc-200 bg-white"
           >
-            {/* Audit-Dashboard */}
-            <div className="px-6 py-10 sm:px-10 lg:px-12 lg:py-12">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-[0.14em] text-sky-600">
-                  Audit-Dashboard
-                </span>
-                <h3 className="mt-4 text-3xl font-semibold tracking-[-0.04em]">
-                  Wo es wirklich zwickt.
-                </h3>
-                <p className="mt-4 leading-7 text-zinc-600">
-                  Diese Befunde basieren auf den öffentlich sichtbaren Signalen
-                  deines Shops. Jeder Punkt zeigt auf eine konkrete, lösbare
-                  Schmerzstelle.
-                </p>
-              </div>
-
-              {/* Findings Grid */}
-              <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {analysis.auditFindings.map((finding, idx: number) => {
-                  const statusColor: Record<string, string> = {
-                    kritisch: "bg-red-50 border-red-200",
-                    warnung: "bg-amber-50 border-amber-200",
-                    optimiert: "bg-emerald-50 border-emerald-200",
-                  };
-                  const statusDot: Record<string, string> = {
-                    kritisch: "bg-red-500",
-                    warnung: "bg-amber-500",
-                    optimiert: "bg-emerald-500",
-                  };
-
-                  return (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.1 }}
-                      className={`rounded-2xl border p-5 ${statusColor[finding.status] || "bg-zinc-50 border-zinc-200"}`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-bold uppercase tracking-[0.1em] text-zinc-600">
-                            {finding.area}
-                          </p>
-                          <h4 className="mt-2 text-base font-semibold text-zinc-950">
-                            {finding.finding}
-                          </h4>
-                        </div>
-                        <span
-                          className={`mt-0.5 size-3 shrink-0 rounded-full ${statusDot[finding.status] || "bg-zinc-400"}`}
-                        />
-                      </div>
-                      <p className="mt-3 text-sm leading-6 text-zinc-700">
-                        {finding.impact}
-                      </p>
-                      {finding.recommendedSolution !== "Keine" && (
-                        <p className="mt-3 rounded-lg bg-white/60 px-3 py-2 text-xs font-medium text-zinc-700">
-                          💡 {finding.recommendedSolution}
-                        </p>
-                      )}
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* CTA Section */}
-            <div className="border-t border-zinc-200 bg-gradient-to-br from-zinc-50 to-white">
+            <div className="bg-gradient-to-br from-zinc-50 to-white">
               <div className="grid gap-10 p-6 sm:p-10 lg:grid-cols-[.8fr_1.2fr] lg:p-12">
                 <div>
                   <span className="text-xs font-bold uppercase tracking-[0.14em] text-sky-600">
@@ -425,6 +318,236 @@ export function ShopAnalyzer() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Audit-Report: rendert direkt im dunklen Panel des Analyzers.        */
+/* Bewusst dicht und technisch gehalten – der Report soll nach Befund  */
+/* aussehen, nicht nach Marketing-Karte.                               */
+/* ------------------------------------------------------------------ */
+
+const severityStyle: Record<
+  string,
+  { label: string; text: string; border: string; bg: string; dot: string }
+> = {
+  kritisch: {
+    label: "KRITISCH",
+    text: "text-red-300",
+    border: "border-red-500/30",
+    bg: "bg-red-500/10",
+    dot: "bg-red-400",
+  },
+  warnung: {
+    label: "WARNUNG",
+    text: "text-amber-300",
+    border: "border-amber-500/30",
+    bg: "bg-amber-500/10",
+    dot: "bg-amber-400",
+  },
+  optimiert: {
+    label: "OPTIMIERT",
+    text: "text-emerald-300",
+    border: "border-emerald-500/30",
+    bg: "bg-emerald-500/10",
+    dot: "bg-emerald-400",
+  },
+};
+
+const fallbackSeverity = {
+  label: "BEFUND",
+  text: "text-zinc-300",
+  border: "border-white/10",
+  bg: "bg-white/5",
+  dot: "bg-zinc-400",
+};
+
+function AuditReport({
+  analysis,
+  onReset,
+}: {
+  analysis: AnalysisResult;
+  onReset: () => void;
+}) {
+  const findings = analysis.auditFindings;
+  const critical = findings.filter((f) => f.status === "kritisch").length;
+  const warnings = findings.filter((f) => f.status === "warnung").length;
+  const healthy = findings.filter((f) => f.status === "optimiert").length;
+
+  const score = analysis.overallHealthScore;
+  const scoreTone =
+    score < 40
+      ? { text: "text-red-400", bar: "bg-red-500", verdict: "Kritisch" }
+      : score < 70
+        ? { text: "text-amber-400", bar: "bg-amber-400", verdict: "Lückenhaft" }
+        : { text: "text-[#c9ff3d]", bar: "bg-[#c9ff3d]", verdict: "Solide" };
+
+  return (
+    <div className="flex min-h-[410px] flex-col">
+      {/* Kopfzeile: Terminal-Anmutung, macht klar dass hier gescannt wurde */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-zinc-500">
+        <span className="flex items-center gap-2">
+          <span className="size-1.5 animate-pulse rounded-full bg-[#c9ff3d]" />
+          Audit Report
+        </span>
+        <span className="truncate text-zinc-400">{analysis.analyzedUrl}</span>
+      </div>
+
+      {/* Score-Block */}
+      <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-zinc-500">
+            Operations Health
+          </p>
+          <p className="mt-2 flex items-baseline gap-2">
+            <span
+              className={`text-5xl font-semibold tabular-nums tracking-[-0.04em] ${scoreTone.text}`}
+            >
+              {score}
+            </span>
+            <span className="text-lg text-zinc-600">/100</span>
+            <span className="ml-1 text-sm font-medium text-zinc-400">
+              {scoreTone.verdict}
+            </span>
+          </p>
+        </div>
+        <div className="flex gap-2 font-mono text-[0.65rem] uppercase tracking-[0.1em]">
+          <span className="rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1 text-red-300">
+            {critical} kritisch
+          </span>
+          <span className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-amber-300">
+            {warnings} warnung
+          </span>
+          <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-emerald-300">
+            {healthy} ok
+          </span>
+        </div>
+      </div>
+
+      <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${score}%` }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          className={`h-full rounded-full ${scoreTone.bar}`}
+        />
+      </div>
+
+      {/* Hauptengpass – der eine Satz, auf den es ankommt */}
+      <div className="mt-7 rounded-2xl border border-[#c9ff3d]/25 bg-[#c9ff3d]/[0.07] p-5">
+        <p className="flex items-center gap-2 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-[#c9ff3d]">
+          <Zap className="size-3.5" /> Primärer Engpass ·{" "}
+          {analysis.primaryBottleneck.category}
+        </p>
+        <h4 className="mt-3 text-xl font-semibold tracking-[-0.02em]">
+          {analysis.primaryBottleneck.title}
+        </h4>
+        <p className="mt-2 text-sm leading-6 text-zinc-400">
+          {analysis.primaryBottleneck.diagnosis}
+        </p>
+      </div>
+
+      {/* Befundliste */}
+      <div className="mt-7">
+        <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-zinc-500">
+          Befunde ({findings.length})
+        </p>
+        <ul className="mt-3 space-y-2">
+          {findings.map((finding, idx: number) => {
+            const tone = severityStyle[finding.status] ?? fallbackSeverity;
+            return (
+              <motion.li
+                key={`${finding.area}-${idx}`}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.08 * idx, duration: 0.35 }}
+                className={`rounded-xl border ${tone.border} ${tone.bg} p-4`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-2 text-sm font-semibold">
+                    <span className={`size-1.5 rounded-full ${tone.dot}`} />
+                    {finding.area}
+                  </span>
+                  <span
+                    className={`font-mono text-[0.6rem] uppercase tracking-[0.14em] ${tone.text}`}
+                  >
+                    {tone.label}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-zinc-300">
+                  {finding.finding}
+                </p>
+                <p className="mt-1.5 flex gap-2 text-xs leading-5 text-zinc-500">
+                  <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
+                  {finding.impact}
+                </p>
+                {finding.recommendedSolution !== "Keine" && (
+                  <p className="mt-3 inline-flex items-center gap-2 rounded-md bg-white/5 px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-zinc-300">
+                    <Check className="size-3" />
+                    {finding.recommendedSolution}
+                  </p>
+                )}
+              </motion.li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {/* Fußzeile: Aufwand, Signale, Vorbehalt */}
+      <div className="mt-7 grid gap-4 border-t border-white/10 pt-6 sm:grid-cols-2">
+        <div>
+          <p className="flex items-center gap-2 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-zinc-500">
+            <Clock className="size-3.5" /> Manuelles Potenzial / Monat
+          </p>
+          <p className="mt-2 text-2xl font-semibold tabular-nums">
+            {analysis.estimatedManualHoursPerMonth.minimum}–
+            {analysis.estimatedManualHoursPerMonth.maximum}
+            <span className="ml-1 text-base font-normal text-zinc-500">
+              Stunden
+            </span>
+          </p>
+        </div>
+        <div>
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-zinc-500">
+            Empfohlene Automatisierung
+          </p>
+          <p className="mt-2 text-sm leading-6 text-zinc-300">
+            {analysis.recommendedAutomation}
+          </p>
+        </div>
+      </div>
+
+      {analysis.publicSignals.length > 0 && (
+        <div className="mt-5">
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-zinc-500">
+            Ausgewertete öffentliche Signale
+          </p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {analysis.publicSignals.map((signal) => (
+              <li
+                key={signal}
+                className="rounded-md border border-white/10 px-2 py-1 text-xs text-zinc-400"
+              >
+                {signal}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <p className="max-w-md text-xs leading-5 text-zinc-600">
+          {confidenceLabel[analysis.confidence]} · {analysis.disclaimer}
+        </p>
+        <button
+          type="button"
+          onClick={onReset}
+          className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-white/20 px-5 text-sm font-semibold transition-colors hover:bg-white/5"
+        >
+          <RotateCcw className="size-4" /> Neuer Scan
+        </button>
+      </div>
     </div>
   );
 }

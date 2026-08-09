@@ -242,6 +242,36 @@ export default function Home() {
           </div>
         </section>
 
+        {/*
+          Direkt unter dem Hero: der Analyzer ist der staerkste
+          Einstiegspunkt der Seite und soll nicht erst nach sieben
+          Abschnitten erreichbar sein.
+        */}
+        <section
+          id="analyse"
+          className="scroll-mt-6 bg-white pb-20 pt-16 sm:pb-28 sm:pt-20"
+        >
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
+            <Reveal className="flex items-center justify-between border-t border-zinc-300 pt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+              <span>/ Live-Potenzialanalyse</span>
+              <span>(01)</span>
+            </Reveal>
+            <Reveal className="mt-12 grid gap-8 lg:grid-cols-[1fr_.9fr] lg:items-end">
+              <h2 className="max-w-4xl text-balance text-[clamp(2.7rem,6.2vw,7rem)] font-semibold leading-[0.9] tracking-[-0.07em]">
+                Dein Engpass. Klar sichtbar.
+              </h2>
+              <p className="max-w-xl text-lg leading-8 text-zinc-600 lg:justify-self-end">
+                Gib deine öffentliche Shop-URL ein. Westmonks verdichtet
+                sichtbare operative Signale zu einem klaren ersten Hebel — ohne
+                Shop-Login.
+              </p>
+            </Reveal>
+            <Reveal delay={0.08} className="mt-14">
+              <ShopAnalyzer />
+            </Reveal>
+          </div>
+        </section>
+
         <section className="bg-white">
           <div className="mx-auto grid max-w-[1440px] grid-cols-2 border-x border-zinc-200 sm:grid-cols-3 lg:grid-cols-6">
             {capabilities.map(([Icon, label]) => (
@@ -259,7 +289,7 @@ export default function Home() {
           <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
             <Reveal className="flex items-center justify-between border-t border-zinc-300 pt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
               <span>/ Das Shopify-Betriebssystem</span>
-              <span>(01)</span>
+              <span>(02)</span>
             </Reveal>
             <Reveal className="mt-12 grid gap-8 lg:grid-cols-[1.1fr_.9fr] lg:items-end">
               <h2 className="max-w-4xl text-balance text-[clamp(2.6rem,6vw,6.8rem)] font-semibold leading-[0.91] tracking-[-0.065em]">
@@ -371,7 +401,7 @@ export default function Home() {
           <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
             <Reveal className="flex items-center justify-between border-t border-zinc-300 pt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
               <span>/ Vom Engpass zum System</span>
-              <span>(02)</span>
+              <span>(03)</span>
             </Reveal>
             <div className="mt-14 grid gap-12 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
               <Reveal className="relative min-h-[560px] overflow-hidden rounded-[1.5rem] bg-zinc-950 p-6 text-white sm:p-8">
@@ -457,7 +487,7 @@ export default function Home() {
           <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
             <Reveal className="flex items-center justify-between border-t border-white/20 pt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
               <span>/ Engineering für Shopify Operations</span>
-              <span>(03)</span>
+              <span>(04)</span>
             </Reveal>
             <Reveal className="mt-12 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               <h2 className="max-w-4xl text-balance text-[clamp(2.6rem,5.8vw,6.5rem)] font-semibold leading-[0.91] tracking-[-0.065em]">
@@ -529,7 +559,7 @@ export default function Home() {
           <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
             <Reveal className="flex items-center justify-between border-t border-zinc-300 pt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
               <span>/ Passt das überhaupt?</span>
-              <span>(04)</span>
+              <span>(05)</span>
             </Reveal>
             <Reveal className="mt-12 max-w-3xl">
               <h2 className="text-balance text-[clamp(2.4rem,5vw,5.2rem)] font-semibold leading-[0.93] tracking-[-0.06em]">
@@ -573,28 +603,6 @@ export default function Home() {
                 </ul>
               </Reveal>
             </div>
-          </div>
-        </section>
-
-        <section id="analyse" className="scroll-mt-6 bg-white pb-24 sm:pb-32">
-          <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
-            <Reveal className="flex items-center justify-between border-t border-zinc-300 pt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
-              <span>/ Live-Potenzialanalyse</span>
-              <span>(05)</span>
-            </Reveal>
-            <Reveal className="mt-12 grid gap-8 lg:grid-cols-[1fr_.9fr] lg:items-end">
-              <h2 className="max-w-4xl text-balance text-[clamp(2.7rem,6.2vw,7rem)] font-semibold leading-[0.9] tracking-[-0.07em]">
-                Dein Engpass. Klar sichtbar.
-              </h2>
-              <p className="max-w-xl text-lg leading-8 text-zinc-600 lg:justify-self-end">
-                Gib deine öffentliche Shop-URL ein. Westmonks verdichtet
-                sichtbare operative Signale zu einem klaren ersten Hebel — ohne
-                Shop-Login.
-              </p>
-            </Reveal>
-            <Reveal delay={0.08} className="mt-14">
-              <ShopAnalyzer />
-            </Reveal>
           </div>
         </section>
 
